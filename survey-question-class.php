@@ -8,11 +8,13 @@ class question {
     const truefalse = 1;
     const multichoice = 2;
     const dropdown = 3;
+    const multiselect = 4;
     public $id = false;
     public $question;
     public $questiontype;
     public $hidden = 0;
     public $answers = array();
+    public $answer = NULL;
     
     public function __construct($id, $type = 0, $questiontext = "") {
         global $wpdb;
@@ -54,11 +56,120 @@ class question {
             throw new Exception('Cannot add answers to a True/False question');
         }
     }
+    
+    public function output_question() {
+        $output = "<div class='question-container'>\n".
+                  "  <div class='question'>{$this->question}</div>\n".
+                  "  <div class='answer-container'>\n";
+        
+        switch ($this->questiontype) {
+            case self::truefalse:
+                $output .= "    <div class='tf-answer'>\n".
+                           "      <input type='radio' name='tf-{$this->id}' value='true' /> True<br />\n".
+                           "      <input type='radio' name='tf-{$this->id}' value='false' /> False\n".
+                           "    </div>\n";
+            break;
+            
+            case self::multichoice:
+                $output .= "    <div class='mc-answer'>\n";
+                
+                foreach ($this->answers as $answer) {
+                    $output .= "      <input type='radio' name='mc-{$this->id}' value='{$answer->id}' /> {$answer->answer}<br />\n";
+                }
+                
+                $output .= "    </div>\n";
+            break;
+            
+            case self::dropdown:
+                $output .= "    <div class='dd-answer'>\n".
+                           "      <select name='dd-{$this->id}'>\n";
+                foreach ($this->answers as $answer) {
+                    $output .= "        <option value='{$answer->id}'>{$answer->answer}</option>\n";
+                }
+                $output .= "      </select>\n".
+                           "    </div>\n";
+            break;
+            
+            case self::multiselect:
+                $output .= "    <div class='ms-answer'>\n";
+                
+                foreach ($this->answers as $answer) {
+                    $output .= "      <input type='checkbox' name='ms-{$this->id}[]' value='{$answer->id}' /> {$answer->answer}<br />\n";
+                }
+                
+                $output .= "    </div>\n";
+            break;
+            
+            default:
+                throw new Exception("Question type of {$this->questiontype} not supported!");
+        }
+        
+        //Close the answer-container and the question-container
+        $output .= "  </div>\n".
+                   "</div>\n";
+        
+        echo $output;
+    }
+    
+    public function get_answer() {
+        switch ($this->questiontype) {
+            case self::truefalse:
+                if (isset($_POST["tf-{$this->id}"])) {
+                    //Sets the answer to true/false as a string.
+                    $this->answer = $_POST["tf-{$this->id}"];
+                }
+            break;
+            
+            case self::multichoice:
+                if (isset($_POST["mc-{$this->id}"])) { 
+                    //Sets the answer to the answer text.
+                    $this->answer = $this->answers[$_POST["mc-{$this->id}"]]->answer;
+                }
+            break;
+            
+            case self::dropdown:
+                if (isset($_POST["dd-{$this->id}"])) { 
+                    //Sets the answer to the answer text.
+                    $this->answer = $this->answers[$_POST["dd-{$this->id}"]]->answer;
+                }
+            break;
+            
+            case self::multiselect:
+                if (isset($_POST["ms-{$this->id}"])) { 
+                    $answers = $_POST["ms-{$this->id}"];
+                    
+                    //Sets the answer to an array of the answers.
+                    $this->answer = array();
+                    foreach ($answers as $answer) {
+                        $this->answer[] = $this->answers[$answer]->answer;
+                    }
+                }
+            break;
+        }
+        
+        return $this->answer;
+    }
 }
+debug($_POST);
 
+echo '<form method="post" action="'.$_SERVER['PHP_SELF'].'">';
 $question = new question(12);
-debug($question);
+//debug($question);
 
-$question->add_answer("Test Answer");
-debug($question);
+$question->questiontype = question::truefalse;
+$question->output_question();
+debug($question->get_answer());
 
+$question->questiontype = question::multichoice;
+$question->output_question();
+debug($question->get_answer());
+
+$question->questiontype = question::dropdown;
+$question->output_question();
+debug($question->get_answer());
+
+$question->questiontype = question::multiselect;
+$question->output_question();
+debug($question->get_answer());
+
+echo '<input type="submit" /> </form>';

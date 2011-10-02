@@ -8,6 +8,9 @@ Author: Ryan Myers
 Author URI: http://ryanmyers.ca
 */
 
+require_once 'survey-include.php';
+require_once 'survey-question-class.php';
+
 register_activation_hook(__FILE__, 'survey_activation');
 register_deactivation_hook(__FILE__, 'survey_deactivation');
 
@@ -17,7 +20,7 @@ function survey_activation() {
     $survey_version = '1.0';
     
     //Create all of the tables needed to get things up and running.
-	$wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey` (
+    $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
     `name` VARCHAR( 200 ) NULL DEFAULT NULL ,
     `questions` TEXT NULL DEFAULT NULL ,
@@ -26,7 +29,7 @@ function survey_activation() {
     $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_questions` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
     `question` TEXT NULL DEFAULT NULL ,
-    `questiontype` VARCHAR( 20 ) NULL DEFAULT NULL ,
+    `questiontype` TINYINT UNSIGNED NULL DEFAULT NULL ,
     `hidden` BOOLEAN NOT NULL DEFAULT  '0')");
     
     $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_answers` (
