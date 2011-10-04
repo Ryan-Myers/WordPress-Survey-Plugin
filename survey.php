@@ -9,6 +9,7 @@ Author URI: http://ryanmyers.ca
 */
 
 require_once 'survey-include.php';
+require_once 'survey-class.php';
 require_once 'survey-question-class.php';
 
 register_activation_hook(__FILE__, 'survey_activation');
