@@ -1,15 +1,10 @@
 <?php
-error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
-ini_set('display_errors',1);
-require_once '../../../wp-config.php';
-require_once 'survey-include.php';
-
 class question {
     const truefalse = 1;
     const multichoice = 2;
     const dropdown = 3;
     const multiselect = 4;
-    public $id = false;
+    public $id = FALSE;
     public $question;
     public $questiontype;
     public $hidden = 0;
@@ -21,22 +16,30 @@ class question {
         
         //Find a question based the passed id.
         if ($id !== FALSE) {
-            $row = $wpdb->get_row("SELECT id, question, questiontype, hidden FROM {$wpdb->prefix}survey_questions WHERE id=$id");
+            $row = $wpdb->get_row($wpdb->prepare("SELECT id, question, questiontype, hidden FROM {$wpdb->prefix}survey_questions WHERE id = %d", $id));
             
-            if ($row !== false) {
+            if ($row !== FALSE) {
                 $this->id = $row->id;
                 $this->question = $row->question;
                 $this->questiontype = $row->questiontype;
                 $this->hidden = $row->hidden;
-                $this->answers = $wpdb->get_results("SELECT id, question, answer, hidden FROM {$wpdb->prefix}survey_answers WHERE question={$this->id}", OBJECT_K);
+                $this->answers = $wpdb->get_results($wpdb->prepare("SELECT id, question, answer, hidden FROM {$wpdb->prefix}survey_answers WHERE question = %d", $this->id), OBJECT_K);
             }
         }
         //If false was passed for id, instead build a new question
         else {
             $insert = $wpdb->insert($wpdb->prefix.'survey_questions', array('question'=>$questiontext, 'questiontype'=>$type), array('%s', '%d'));
-            $this->id = $insert ? $wpdb->insert_id : false;
-            $this->question = $questiontext;
-            $this->questiontype = $type;
+            
+            //Set the id of this survey to the id of the last inserted row.
+            $this->id = $insert ? $wpdb->insert_id : FALSE;
+            
+            if ($this->id !== FALSE) {
+                $this->question = $questiontext;
+                $this->questiontype = $type;
+            }
+            else {
+                throw new Exception('Could not create question!');
+            }
         }
     }
     
@@ -49,7 +52,7 @@ class question {
             
             //Upon successful creation of a question, add it to the list of answers.
             if ($insert) {
-                $this->answers[$wpdb->insert_id] = $wpdb->get_row("SELECT id, question, answer, hidden FROM {$wpdb->prefix}survey_answers WHERE id={$wpdb->insert_id}");
+                $this->answers[$wpdb->insert_id] = $wpdb->get_row($wpdb->prepare("SELECT id, question, answer, hidden FROM {$wpdb->prefix}survey_answers WHERE id= = %d", $wpdb->insert_id));
             }
         }
         else {
@@ -150,26 +153,3 @@ class question {
         return $this->answer;
     }
 }
-debug($_POST);
-
-echo '<form method="post" action="'.$_SERVER['PHP_SELF'].'">';
-$question = new question(12);
-//debug($question);
-
-$question->questiontype = question::truefalse;
-$question->output_question();
-debug($question->get_answer());
-
-$question->questiontype = question::multichoice;
-$question->output_question();
-debug($question->get_answer());
-
-$question->questiontype = question::dropdown;
-$question->output_question();
-debug($question->get_answer());
-
-$question->questiontype = question::multiselect;
-$question->output_question();
-debug($question->get_answer());
-
-echo '<input type="submit" /> </form>';
