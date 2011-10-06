@@ -5,6 +5,7 @@ class survey {
     public $questions = "";
     public $qobjects = array(); //array of question objects
     public $questionsperpage;
+	public $answers = array();
     
     public function __construct($id, $name = "", $questionsperpage = 10) {
         global $wpdb;
@@ -78,4 +79,24 @@ class survey {
         //Update the database with this new list of questions
         $wpdb->update($wpdb->prefix.'survey', array('questions'=>$this->questions), array('id'=>$this->id), array('%s'), array('%d'));
     }
+	
+	public function output_survey() {
+		$output = "<form method='post' action='$_SERVER[PHP_SELF]'>\n";
+		
+		foreach ($this->qobjects as $question) {
+			$output .= $question->get_question();
+		}
+		
+		$output .= "<input type='submit' />\n</form>";
+		
+		echo $output;
+	}
+	
+	public function get_answers() {	
+		foreach ($this->qobjects as $question) {
+			$this->answers[$question->id] = $question->get_answer();
+		}
+		
+		return $this->answers;
+	}
 }

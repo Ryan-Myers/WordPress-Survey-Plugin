@@ -8,32 +8,12 @@ require_once 'survey-question-class.php';
 
 debug($_POST);
 
-echo '<form method="post" action="'.$_SERVER['PHP_SELF'].'">';
-$question = new question(12);
-//debug($question);
-
-echo "<b>Testing true/false</b><br />\n";
-$question->questiontype = question::truefalse;
-$question->output_question();
-debug($question->get_answer());
-
-echo "<b>Testing multiple choice</b><br />\n";
-$question->questiontype = question::multichoice;
-$question->output_question();
-debug($question->get_answer());
-
-echo "<b>Testing dropdown</b><br />\n";
-$question->questiontype = question::dropdown;
-$question->output_question();
-debug($question->get_answer());
-
-echo "<b>Testing multiple selection</b><br />\n";
-$question->questiontype = question::multiselect;
-$question->output_question();
-debug($question->get_answer());
-
-echo '<input type="submit" /> </form>';
-
+$question = new question(1);
 $survey = new survey(2);
-//$survey->add_qobject($question);
+$survey->add_qobject($question);
+debug($survey);
+
+$survey->output_survey();
+
+debug($survey->get_answers());
 debug($survey);

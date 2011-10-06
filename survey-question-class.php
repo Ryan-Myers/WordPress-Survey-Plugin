@@ -60,7 +60,7 @@ class question {
         }
     }
     
-    public function output_question() {
+    public function get_question() {
         $output = "<div class='question-container'>\n".
                   "  <div class='question'>{$this->question}</div>\n".
                   "  <div class='answer-container'>\n";
@@ -111,7 +111,7 @@ class question {
         $output .= "  </div>\n".
                    "</div>\n";
         
-        echo $output;
+        return $output;
     }
     
     public function get_answer() {
