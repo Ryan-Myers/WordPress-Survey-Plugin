@@ -49,12 +49,32 @@ function survey_deactivation() {
     global $wpdb;
 	
     //Remove the created tables for this plugin
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
+    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
+    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
+    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
     
     //Remove the survey version from the wordpress options table.
-    delete_option('survey_version');
+    //delete_option('survey_version');
 }
 
-?>
+/*** Allows a shortcode to be created that will add the survey to the page. The shortcode is [survey-page] ***/
+add_shortcode('survey-page','survey_page');
+function survey_page($atts, $content=null) {
+    debug($_POST);
+
+    $question = new question(1);
+    $survey = new survey(2);
+    $survey->add_qobject($question);
+
+    $survey->output_survey();
+
+    debug($survey->get_answers());
+    debug($survey);
+}
+
+/*** Adds the survey-style CSS file to the header ***/
+add_action('wp_print_styles', 'survey_css');
+function survey_css() {
+    wp_register_style("survey_style_css", plugins_url('survey-style.css', __FILE__));
+	wp_enqueue_style("survey_style_css");
+}

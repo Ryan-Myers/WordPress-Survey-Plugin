@@ -81,13 +81,13 @@ class survey {
     }
 	
 	public function output_survey() {
-		$output = "<form method='post' action='$_SERVER[PHP_SELF]'>\n";
+		$output = "<form method='post' action='$_SERVER[PHP_SELF]' id='survey-form'>\n";
 		
 		foreach ($this->qobjects as $question) {
 			$output .= $question->get_question();
 		}
 		
-		$output .= "<input type='submit' />\n</form>";
+		$output .= "<input type='submit' id='survey-submit' />\n</form>";
 		
 		echo $output;
 	}
