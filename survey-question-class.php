@@ -23,7 +23,7 @@ class question {
                 $this->question = $row->question;
                 $this->questiontype = $row->questiontype;
                 $this->hidden = $row->hidden;
-                $this->answers = $wpdb->get_results($wpdb->prepare("SELECT id, question, answer, hidden FROM {$wpdb->prefix}survey_answers WHERE question = %d", $this->id), OBJECT_K);
+                $this->answers = $wpdb->get_results($wpdb->prepare("SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0", $this->id), OBJECT_K);
             }
         }
         //If false was passed for id, instead build a new question
@@ -52,7 +52,7 @@ class question {
             
             //Upon successful creation of a question, add it to the list of answers.
             if ($insert) {
-                $this->answers[$wpdb->insert_id] = $wpdb->get_row($wpdb->prepare("SELECT id, question, answer, hidden FROM {$wpdb->prefix}survey_answers WHERE id= = %d", $wpdb->insert_id));
+                $this->answers[$wpdb->insert_id] = $wpdb->get_row($wpdb->prepare("SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE id = %d AND hidden = 0", $wpdb->insert_id));
             }
         }
         else {

@@ -8,12 +8,15 @@ Author: Ryan Myers
 Author URI: http://ryanmyers.ca
 */
 
+require_once 'survey-admin.php';
+//require_once 'survey-admin-post.php';
 require_once 'survey-include.php';
 require_once 'survey-class.php';
 require_once 'survey-question-class.php';
 
 register_activation_hook(__FILE__, 'survey_activation');
 register_deactivation_hook(__FILE__, 'survey_deactivation');
+add_action('admin_menu', 'survey_add_admin_link');
 
 /*** Upon Activating the plugin this gets called. ***/
 function survey_activation() {
