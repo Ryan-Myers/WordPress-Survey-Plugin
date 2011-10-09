@@ -27,9 +27,11 @@ function survey_show_admin_page() {
   
 ?>
 <script type="text/javascript">
+    //A bit of jQuery to hide and show the question and answer stuff as necessary.
     jQuery(document).ready(function(){
         jQuery('#questionsetup').hide();
         
+        //When the dropdown list changes, this gets called.
         jQuery("#qtype").change(function(){
             var qtype = jQuery("#qtype option:selected").val();
             if (qtype != 0) {
@@ -47,6 +49,7 @@ function survey_show_admin_page() {
         });
     });
     
+    //When the Add Answer button is pressed, this will get called.
     function add_answer(button) {
         //Grab the parent of the passed button, which should be the answer class.
         var answer = jQuery(button).parent();
@@ -54,12 +57,18 @@ function survey_show_admin_page() {
         //Clone the entire answer contents
         var clone = answer.clone();
         
-        //
+        //Modify the Number next to the textbox to show how many answers there are.
         var answernum = clone.children('.answernumber');
         jQuery(answernum).text((parseInt(answernum.html().substring(0, 1)) + 1) + ". ");
         
+        //Add the new clone to the list, and remove the button that was pressed so only one remains.
         jQuery('#answers').append(clone);
         jQuery(button).remove();
+    }
+    
+    function remove_answer(button) {
+        //Remove the selected answer.
+        jQuery(button).parent().remove();
     }
 </script>
 <div class="wrap">

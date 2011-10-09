@@ -9,7 +9,6 @@ Author URI: http://ryanmyers.ca
 */
 
 require_once 'survey-admin.php';
-//require_once 'survey-admin-post.php';
 require_once 'survey-include.php';
 require_once 'survey-class.php';
 require_once 'survey-question-class.php';
