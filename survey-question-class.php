@@ -20,19 +20,24 @@ class question {
         
         //Find a question based the passed id.
         if ($id !== FALSE) {
-            $row = $wpdb->get_row($wpdb->prepare("SELECT id, question, questiontype, hidden FROM {$wpdb->prefix}survey_questions WHERE id = %d", $id));
+            $query = "SELECT id, question, questiontype, hidden FROM {$wpdb->prefix}survey_questions WHERE id = %d";
+            $row = $wpdb->get_row($wpdb->prepare($query, $id));
             
             if ($row !== FALSE) {
                 $this->id = $row->id;
                 $this->question = $row->question;
                 $this->questiontype = $row->questiontype;
                 $this->hidden = $row->hidden;
-                $this->answers = $wpdb->get_results($wpdb->prepare("SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0", $this->id), OBJECT_K);
+                
+                $query = "SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0";
+                $this->answers = $wpdb->get_results($wpdb->prepare($query, $this->id), OBJECT_K);
             }
         }
         //If false was passed for id, instead build a new question
         else {
-            $insert = $wpdb->insert($wpdb->prefix.'survey_questions', array('question'=>$questiontext, 'questiontype'=>$type), array('%s', '%d'));
+            $insert = $wpdb->insert($wpdb->prefix.'survey_questions', 
+                                    array('question'=>$questiontext, 'questiontype'=>$type), 
+                                    array('%s', '%d'));
             
             //Set the id of this survey to the id of the last inserted row.
             $this->id = $insert ? $wpdb->insert_id : FALSE;
@@ -52,11 +57,14 @@ class question {
         
         //Don't add answers for certain questions
         if ($this->type !== self::truefalse && $this->type !== self::shortanswer && $this->type !== self::longanswer) {
-            $insert = $wpdb->insert($wpdb->prefix.'survey_answers', array('question'=>$this->id, 'answer'=>$answer), array('%d', '%s'));
+            $insert = $wpdb->insert($wpdb->prefix.'survey_answers', 
+                                    array('question'=>$this->id, 'answer'=>$answer), 
+                                    array('%d', '%s'));
             
             //Upon successful creation of an answer, add it to the list of answers in this object.
             if ($insert) {
-                $this->answers[$wpdb->insert_id] = $wpdb->get_row($wpdb->prepare("SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE id = %d AND hidden = 0", $wpdb->insert_id));
+                $query = "SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE id = %d AND hidden = 0";
+                $this->answers[$wpdb->insert_id] = $wpdb->get_row($wpdb->prepare($query, $wpdb->insert_id));
             }
         }
         else {
@@ -81,7 +89,8 @@ class question {
                 $output .= "    <div class='mc-answer'>\n";
                 
                 foreach ($this->answers as $answer) {
-                    $output .= "      <input type='radio' name='mc-{$this->id}' value='{$answer->id}' /> {$answer->answer}<br />\n";
+                    $output .= "      <input type='radio' name='mc-{$this->id}' value='{$answer->id}' /> ".
+                               "{$answer->answer}<br />\n";
                 }
                 
                 $output .= "    </div>\n";
@@ -101,7 +110,8 @@ class question {
                 $output .= "    <div class='ms-answer'>\n";
                 
                 foreach ($this->answers as $answer) {
-                    $output .= "      <input type='checkbox' name='ms-{$this->id}[]' value='{$answer->id}' /> {$answer->answer}<br />\n";
+                    $output .= "      <input type='checkbox' name='ms-{$this->id}[]' value='{$answer->id}' /> ".
+                               "{$answer->answer}<br />\n";
                 }
                 
                 $output .= "    </div>\n";
@@ -123,7 +133,8 @@ class question {
                 $output .= "    <div class='mco-answer'>\n";
                 
                 foreach ($this->answers as $answer) {
-                    $output .= "      <input type='radio' name='mco-{$this->id}' value='{$answer->id}' /> {$answer->answer}<br />\n";
+                    $output .= "      <input type='radio' name='mco-{$this->id}' value='{$answer->id}' /> ".
+                               "{$answer->answer}<br />\n";
                 }
                 
                 $output .= "      <input type='radio' name='mco-{$this->id}' value='other' /> ".
@@ -136,7 +147,8 @@ class question {
                 $output .= "    <div class='mso-answer'>\n";
                 
                 foreach ($this->answers as $answer) {
-                     $output .= "      <input type='checkbox' name='mso-{$this->id}[]' value='{$answer->id}' /> {$answer->answer}<br />\n";
+                     $output .= "      <input type='checkbox' name='mso-{$this->id}[]' value='{$answer->id}' /> ".
+                                "{$answer->answer}<br />\n";
                 }
                 
                 $output .= "      <input type='checkbox' name='mso-{$this->id}[]' value='other' /> ".

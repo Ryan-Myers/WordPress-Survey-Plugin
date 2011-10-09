@@ -12,7 +12,8 @@ class survey {
         
         //Find a survey based the passed id.
         if ($id !== FALSE) {   
-            $row = $wpdb->get_row($wpdb->prepare("SELECT id, name, questions, questionsperpage FROM {$wpdb->prefix}survey WHERE id = %d", $id));
+            $query = "SELECT id, name, questions, questionsperpage FROM {$wpdb->prefix}survey WHERE id = %d";
+            $row = $wpdb->get_row($wpdb->prepare($query, $id));
             
             if ($row !== FALSE) {
                 $this->id = $row->id;
@@ -20,7 +21,8 @@ class survey {
                 $this->questions = $row->questions;
                 $this->questionsperpage = $row->questionsperpage;
                 
-                //Transform the comma seperated list of questions id's into an array, and then create a question object for each one.
+                //Transform the comma seperated list of questions id's into an array, 
+                //and then create a question object for each one.
                 $questions = explode(',', $this->questions);
                 foreach ($questions as $question_id) {
                     $this->qobjects[$question_id] = new question($question_id);
@@ -29,7 +31,9 @@ class survey {
         }
         //If false was passed for id, instead build a new survey
         else {
-            $insert = $wpdb->insert($wpdb->prefix.'survey', array('name'=>$name, 'questionsperpage'=>$questionsperpage), array('%s', '%d'));
+            $insert = $wpdb->insert($wpdb->prefix.'survey', 
+                                    array('name'=>$name, 'questionsperpage'=>$questionsperpage), 
+                                    array('%s', '%d'));
             
             //Set the id of this survey to the id of the last inserted row.
             $this->id = $insert ? $wpdb->insert_id : FALSE;
@@ -68,7 +72,8 @@ class survey {
             //Add the new question id to the list.
             $questions[] = $question_id;
             
-            //Then bring them all together again seperated by commas. Also makes sure to only use unique instances of each question.
+            //Then bring them all together again seperated by commas.
+            //Also makes sure to only use unique instances of each question.
             $this->questions = implode(',', array_unique($questions));
         }
         else {
@@ -77,7 +82,8 @@ class survey {
         }
         
         //Update the database with this new list of questions
-        $wpdb->update($wpdb->prefix.'survey', array('questions'=>$this->questions), array('id'=>$this->id), array('%s'), array('%d'));
+        $wpdb->update($wpdb->prefix.'survey', array('questions'=>$this->questions), 
+                      array('id'=>$this->id), array('%s'), array('%d'));
     }
 	
 	public function output_survey() {
