@@ -1,0 +1,17 @@
+This is Wordpress plugin that will eventually allow for creating surveys for users. 
+The goal is to allow users to register for the survey, fill it out, and then the administrator of the site
+can view the results, and make decisions based on the answers. It will probably use it's own
+registration system seperate from Wordpress.
+
+The system is being designed from the ground up, and is intended to be easily expanded to support new features
+with minimal effort. 
+
+Current question types supported:
+ - True/False
+ - Multiple Choice
+ - Drop-down list
+ - Multiple Selection
+ - Short Answer
+ - Long Answer
+ - Multiple Choice with an "Other" option
+ - Multiple Selection with an "Other" option
