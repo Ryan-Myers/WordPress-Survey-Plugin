@@ -11,18 +11,25 @@ function survey_show_admin_page() {
     }
   
     if (isset($_POST['qtype'])) {
-        debug($_POST);
-
         $qtype = $_POST['qtype'];
         $question = new question(false, $qtype, $_POST['qtext']);
-
-        if ($qtype !== question::truefalse) {
-            foreach ($_POST['answer'] as $answer) {
-                $question->add_answer($answer);
-            }
+        
+        switch ($qtype) {
+            case question::truefalse:
+            case question::shortanswer:
+            case question::longanswer:
+                //These question types don't have answers.
+                break;
+            default:
+                foreach ($_POST['answer'] as $answer) {
+                    $question->add_answer($answer);
+                }
         }
-
-        debug($question);
+        
+        $survey = new survey(1);
+        $survey->add_qobject($question);
+        
+        echo "Question added to the survey!";
     }
   
 ?>
@@ -34,17 +41,22 @@ function survey_show_admin_page() {
         //When the dropdown list changes, this gets called.
         jQuery("#qtype").change(function(){
             var qtype = jQuery("#qtype option:selected").val();
-            if (qtype != 0) {
-                if (qtype == 1) {
+            switch(qtype) {
+                case "0":
+                    //If it's still the default "Select a question type" then don't display any part of the question.
+                    jQuery('#questionsetup').slideUp();
+                    break;
+                case "1": //True/False
+                case "5": //Short Answer
+                case "6": //Long Answer
+                    //Don't show the answers for questions that don't have any.
                     jQuery('#answers').hide();
-                }
-                else {
+                    jQuery('#questionsetup').slideDown();
+                    break;
+                default:
+                    //Show the answers for every other question type.
                     jQuery('#answers').slideDown();
-                }
-                jQuery('#questionsetup').slideDown();
-            }
-            else {
-                jQuery('#questionsetup').slideUp();
+                    jQuery('#questionsetup').slideDown();
             }
         });
     });
@@ -77,9 +89,13 @@ function survey_show_admin_page() {
     <select id="qtype" name="qtype">
         <option value="0">Select a question type</option>
         <option value="1">True/False</option>
-        <option value="2">Multiple Choice</option>
+        <option value="2">Multiple Choice</option>        
+        <option value="7">Multiple Choice / Other</option>
         <option value="3">Drop-down List</option>
         <option value="4">Multiple Select</option>
+        <option value="8">Multiple Select / Other</option>
+        <option value="5">Short Answer</option>
+        <option value="6">Long Answer</option>
     </select><br />
     <div id="questionsetup">
         <span>Question Text: <input type="text" name="qtext" /></span><br />

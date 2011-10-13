@@ -61,6 +61,7 @@ class survey {
         $this->add_question_id($qobject->id);
     }
     
+    //TODO: Make quesiton ordering work here.
     private function add_question_id($question_id) {
         global $wpdb;
         
@@ -87,13 +88,13 @@ class survey {
     }
 	
 	public function output_survey() {
-		$output = "<form method='post' action='$_SERVER[PHP_SELF]' id='survey-form'>\n";
+		$output = "<form method='post' action='{$_SERVER['PHP_SELF']}' id='survey-form'>\n";
 		
 		foreach ($this->qobjects as $question) {
 			$output .= $question->get_question();
 		}
 		
-		$output .= "<input type='submit' id='survey-submit' />\n</form>";
+		$output .= "<input type='submit' id='survey-submit' value='Submit' />\n</form>";
 		
 		echo $output;
 	}

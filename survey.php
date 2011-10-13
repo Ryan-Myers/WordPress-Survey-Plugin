@@ -33,12 +33,14 @@ function survey_activation() {
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
     `question` TEXT NULL DEFAULT NULL ,
     `questiontype` TINYINT UNSIGNED NULL DEFAULT NULL ,
+    `order` SMALLINT NOT NULL ,
     `hidden` BOOLEAN NOT NULL DEFAULT  '0')");
     
     $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_answers` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
     `question` INT NOT NULL ,
     `answer` TEXT NULL DEFAULT NULL ,
+    `order` SMALLINT NOT NULL ,
     `hidden` BOOLEAN NOT NULL DEFAULT  '0')");
     
     //Add the survey version to the wordpress options table. 

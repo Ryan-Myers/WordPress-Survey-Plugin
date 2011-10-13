@@ -11,33 +11,35 @@ class question {
     public $id = FALSE;
     public $question;
     public $questiontype;
+    public $order;
     public $hidden = 0;
     public $answers = array();
     public $answer = NULL;
     
-    public function __construct($id, $type = 0, $questiontext = "") {
+    public function __construct($id, $type = 0, $questiontext = "", $order = 0) {
         global $wpdb;
         
         //Find a question based the passed id.
         if ($id !== FALSE) {
-            $query = "SELECT id, question, questiontype, hidden FROM {$wpdb->prefix}survey_questions WHERE id = %d";
+            $query = "SELECT id, question, questiontype, order, hidden FROM {$wpdb->prefix}survey_questions WHERE id = %d";
             $row = $wpdb->get_row($wpdb->prepare($query, $id));
             
             if ($row !== FALSE) {
                 $this->id = $row->id;
                 $this->question = $row->question;
                 $this->questiontype = $row->questiontype;
+                $this->order = $row->order;
                 $this->hidden = $row->hidden;
                 
-                $query = "SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0";
+                $query = "SELECT id, answer, order FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0 ORDER BY order";
                 $this->answers = $wpdb->get_results($wpdb->prepare($query, $this->id), OBJECT_K);
             }
         }
         //If false was passed for id, instead build a new question
         else {
             $insert = $wpdb->insert($wpdb->prefix.'survey_questions', 
-                                    array('question'=>$questiontext, 'questiontype'=>$type), 
-                                    array('%s', '%d'));
+                                    array('question'=>$questiontext, 'questiontype'=>$type, 'order'=>$order), 
+                                    array('%s', '%d', '%d'));
             
             //Set the id of this survey to the id of the last inserted row.
             $this->id = $insert ? $wpdb->insert_id : FALSE;
@@ -45,6 +47,7 @@ class question {
             if ($this->id !== FALSE) {
                 $this->question = $questiontext;
                 $this->questiontype = $type;
+                $this->order = $order;
             }
             else {
                 throw new Exception('Could not create question!');
@@ -52,19 +55,26 @@ class question {
         }
     }
     
-    public function add_answer($answer) {
+    public function add_answer($answer, $order = FALSE) {
         global $wpdb;
         
         //Don't add answers for certain questions
         if ($this->type !== self::truefalse && $this->type !== self::shortanswer && $this->type !== self::longanswer) {
-            $insert = $wpdb->insert($wpdb->prefix.'survey_answers', 
-                                    array('question'=>$this->id, 'answer'=>$answer), 
-                                    array('%d', '%s'));
+            if ($order === FALSE) {
+                //Select the highest order number and add one, to append this question.
+                $query = "SELECT MAX(order)+1 AS order FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0";
+                $order = $wpdb->get_var($wpdb->prepare($query, $this->id));
+            }
             
-            //Upon successful creation of an answer, add it to the list of answers in this object.
+            $insert = $wpdb->insert($wpdb->prefix.'survey_answers', 
+                                    array('question'=>$this->id, 'answer'=>$answer, 'order'=>$order), 
+                                    array('%d', '%s', '%d'));
+            
+            //Upon successful creation of an answer, recreate the list of answers in this object.
+            //It's being recreated to keep the order proper.
             if ($insert) {
-                $query = "SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE id = %d AND hidden = 0";
-                $this->answers[$wpdb->insert_id] = $wpdb->get_row($wpdb->prepare($query, $wpdb->insert_id));
+                $query = "SELECT id, answer, order FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0 ORDER BY order";
+                $this->answers = $wpdb->get_results($wpdb->prepare($query, $this->id), OBJECT_K);
             }
         }
         else {
