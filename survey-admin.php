@@ -89,7 +89,7 @@ function survey_show_admin_page() {
     <select id="qtype" name="qtype">
         <option value="0">Select a question type</option>
         <option value="1">True/False</option>
-        <option value="2">Multiple Choice</option>        
+        <option value="2">Multiple Choice</option>
         <option value="7">Multiple Choice / Other</option>
         <option value="3">Drop-down List</option>
         <option value="4">Multiple Select</option>

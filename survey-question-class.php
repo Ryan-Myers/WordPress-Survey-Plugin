@@ -21,7 +21,8 @@ class question {
         
         //Find a question based the passed id.
         if ($id !== FALSE) {
-            $query = "SELECT id, question, questiontype, order, hidden FROM {$wpdb->prefix}survey_questions WHERE id = %d";
+            $query = "SELECT id, question, questiontype, order, hidden ".
+                     "FROM {$wpdb->prefix}survey_questions WHERE id = %d";
             $row = $wpdb->get_row($wpdb->prepare($query, $id));
             
             if ($row !== FALSE) {
@@ -31,7 +32,8 @@ class question {
                 $this->order = $row->order;
                 $this->hidden = $row->hidden;
                 
-                $query = "SELECT id, answer, order FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0 ORDER BY order";
+                $query = "SELECT id, answer, order ".
+                         "FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0 ORDER BY order";
                 $this->answers = $wpdb->get_results($wpdb->prepare($query, $this->id), OBJECT_K);
             }
         }
@@ -62,7 +64,8 @@ class question {
         if ($this->type !== self::truefalse && $this->type !== self::shortanswer && $this->type !== self::longanswer) {
             if ($order === FALSE) {
                 //Select the highest order number and add one, to append this question.
-                $query = "SELECT MAX(order)+1 AS order FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0";
+                $query = "SELECT MAX(order)+1 AS order ".
+                         "FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0";
                 $order = $wpdb->get_var($wpdb->prepare($query, $this->id));
             }
             
@@ -73,7 +76,8 @@ class question {
             //Upon successful creation of an answer, recreate the list of answers in this object.
             //It's being recreated to keep the order proper.
             if ($insert) {
-                $query = "SELECT id, answer, order FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0 ORDER BY order";
+                $query = "SELECT id, answer, order ".
+                         "FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0 ORDER BY order";
                 $this->answers = $wpdb->get_results($wpdb->prepare($query, $this->id), OBJECT_K);
             }
         }
