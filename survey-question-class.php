@@ -70,6 +70,9 @@ class question {
                 $query = "SELECT MAX(ordernum)+1 AS ordernum ".
                          "FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0";
                 $ordernum = $wpdb->get_var($wpdb->prepare($query, $this->id));
+                
+                //If there isn't any order numbers existing yet, this is the first so default it to 1.
+                if ($ordernum === NULL) $ordernum = 1;
             }
             
             $insert = $wpdb->insert($wpdb->prefix.'survey_answers', 
