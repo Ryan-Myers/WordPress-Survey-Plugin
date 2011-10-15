@@ -17,7 +17,7 @@ class survey {
             
             if ($row !== FALSE) {
                 $this->id = $row->id;
-                $this->name = $row->question;
+                $this->name = $row->name;
                 $this->questions = $row->questions;
                 $this->questionsperpage = $row->questionsperpage;
                 
@@ -48,9 +48,11 @@ class survey {
         }
     }
     
-    public function add_question($type, $questiontext = "") {
+    public function add_question($type, $questiontext = "", $ordernum = 0) {
         //If you want to add a question by id, then use add_qobject(new question($id))
-        add_qobject(new question(FALSE, $type, $questiontext));
+        $qobject = $this->add_qobject(new question(FALSE, $type, $questiontext, $ordernum));
+        
+        return $qobject; 
     }
     
     public function add_qobject($qobject) {
@@ -59,9 +61,11 @@ class survey {
         
         //Add the question ids to the questions string.
         $this->add_question_id($qobject->id);
+        
+        return $qobject;
     }
     
-    //TODO: Make quesiton ordering work here.
+    //TODO: Make question ordering work here.
     private function add_question_id($question_id) {
         global $wpdb;
         
@@ -88,12 +92,12 @@ class survey {
     }
 	
 	public function output_survey() {
-		$output = "<form method='post' action='{$_SERVER['PHP_SELF']}' id='survey-form'>\n";
+		$output = "<form method='post' action='{$_SERVER["REQUEST_URI"]}' id='survey-form'>\n";
 		
 		foreach ($this->qobjects as $question) {
 			$output .= $question->get_question();
 		}
-		
+		$output .= "<input type='hidden' name='survey-id' value='{$this->id}' />";
 		$output .= "<input type='submit' id='survey-submit' value='Submit' />\n</form>";
 		
 		echo $output;
