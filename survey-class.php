@@ -15,7 +15,7 @@ class survey {
             $query = "SELECT id, name, questions, questionsperpage FROM {$wpdb->prefix}survey WHERE id = %d";
             $row = $wpdb->get_row($wpdb->prepare($query, $id));
             
-            if ($row !== FALSE) {
+            if ($row !== NULL) {
                 $this->id = $row->id;
                 $this->name = $row->name;
                 $this->questions = $row->questions;
@@ -25,8 +25,11 @@ class survey {
                 //and then create a question object for each one.
                 $questions = explode(',', $this->questions);
                 foreach ($questions as $question_id) {
-                    $this->qobjects[$question_id] = new question($question_id);
+                    $this->add_qobject(new question($question_id));
                 }
+            }
+            else {
+                throw new Exception("Survey ID $id does not exist!");
             }
         }
         //If false was passed for id, instead build a new survey
@@ -52,12 +55,27 @@ class survey {
         //If you want to add a question by id, then use add_qobject(new question($id))
         $qobject = $this->add_qobject(new question(FALSE, $type, $questiontext, $ordernum));
         
-        return $qobject; 
+        return $qobject;
     }
     
     public function add_qobject($qobject) {
-        //Add this object to the array indexed by the question id.
-        $this->qobjects[$qobject->id] = $qobject;
+        //Add this object to the array indexed by the question order numbers
+        if (!isset($this->qobjects[$qobject->ordernum])) {
+            $this->qobjects[$qobject->ordernum] = $qobject;
+        }
+        else {
+            //If the order number for this object already exists, just increment it by one and try again.
+            $qobject->ordernum = $qobject->ordernum+1;
+            $this->add_qobject($qobject);
+            
+            //Update the database with this new order number
+            global $wpdb;
+            $wpdb->update($wpdb->prefix.'survey_questions', array('ordernum'=>$qobject->ordernum), 
+                      array('id'=>$qobject->id), array('%d'), array('%d'));
+        }
+        
+        //Reorder the question by the array key to keep things in order for the output.
+        ksort($this->qobjects);
         
         //Add the question ids to the questions string.
         $this->add_question_id($qobject->id);
@@ -65,7 +83,6 @@ class survey {
         return $qobject;
     }
     
-    //TODO: Make question ordering work here.
     private function add_question_id($question_id) {
         global $wpdb;
         
@@ -97,7 +114,8 @@ class survey {
 		foreach ($this->qobjects as $question) {
 			$output .= $question->get_question();
 		}
-		$output .= "<input type='hidden' name='survey-id' value='{$this->id}' />";
+        
+		$output .= "<input type='hidden' name='survey-id' value='{$this->id}' />\n";
 		$output .= "<input type='submit' id='survey-submit' value='Submit' />\n</form>";
 		
 		echo $output;

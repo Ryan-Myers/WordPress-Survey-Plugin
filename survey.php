@@ -80,23 +80,24 @@ function survey_page($atts, $content=null) {
     $question3->add_answer("DD Answer 1");
     $question3->add_answer("DD Answer 2", 2);
     
-    $question4 = $survey1->add_question(question::multiselect, "Multiple Select: Order 4", 4);
-    $question4->add_answer("MS Answer 1", 1);
+    $question4 = $survey1->add_question(question::multiselect, "Multiple Select: Order 4", 1);
     $question4->add_answer("MS Answer 2", 2);
+    $question4->add_answer("MS Answer 1", 1);
+    $question4->add_answer("MS Answer 3", 3);
     
-    $question5 = $survey1->add_question(question::shortanswer, "Short Answer: Order 5", 5);
+    $question5 = $survey1->add_question(question::shortanswer, "Short Answer: Order 6", 6);
     $question5->add_answer("SA Answer 1 DONT SHOW THIS!", 1);
     
-    $question6 = $survey1->add_question(question::longanswer, "Long Answer: Order 6", 6);
+    $question6 = $survey1->add_question(question::longanswer, "Long Answer: Order 5", 5);
     $question6->add_answer("LA Answer 1 DONT SHOW THIS!", 1);
     
     $question7 = $survey1->add_question(question::multichoiceother, "Multiple Choice Other: Order 7", 7);
-    $question7->add_answer("MCO Answer 1", 1);
-    $question7->add_answer("MCO Answer 2", 2);
+    $question7->add_answer("MCO Answer 1");
+    $question7->add_answer("MCO Answer 2");
     
     $question8 = new question(FALSE, question::multiselectother, "Multiple Select Other: Order 8", 8);
-    $question8->add_answer("MSO Answer 1", 1);
-    $question8->add_answer("MSO Answer 2", 2);
+    $question8->add_answer("MSO Answer 1");
+    $question8->add_answer("MSO Answer 2");
     $survey1->add_qobject($question8);
     
     $survey1->output_survey();
