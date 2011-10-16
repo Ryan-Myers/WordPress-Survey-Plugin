@@ -16,6 +16,7 @@ require_once 'survey-question-class.php';
 register_activation_hook(__FILE__, 'survey_activation');
 register_deactivation_hook(__FILE__, 'survey_deactivation');
 add_action('admin_menu', 'survey_add_admin_link');
+add_action('wp_ajax_survey_select_ajax', 'survey_select_ajax_callback');
 
 /*** Upon Activating the plugin this gets called. ***/
 function survey_activation() {
@@ -64,6 +65,14 @@ function survey_deactivation() {
 /*** Allows a shortcode to be created that will add the survey to the page. The shortcode is [survey-page] ***/
 add_shortcode('survey-page','survey_page');
 function survey_page($atts, $content=null) {
+    $survey = new survey($atts['id']);
+    
+    $survey->output_survey();
+}
+
+
+add_shortcode('survey-test','survey_test');
+function survey_test($atts, $content=null) {
     debug($_POST);
     
     $survey1 = new survey(FALSE, "Survey 1");
