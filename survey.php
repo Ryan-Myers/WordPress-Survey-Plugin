@@ -17,8 +17,11 @@ register_activation_hook(__FILE__, 'survey_activation');
 register_deactivation_hook(__FILE__, 'survey_deactivation');
 add_action('admin_menu', 'survey_add_admin_link');
 add_action('wp_ajax_survey_select_ajax', 'survey_select_ajax_callback');
+add_action('wp_ajax_survey_add_question_ajax', 'survey_add_question_ajax_callback');
 
-/*** Upon Activating the plugin this gets called. ***/
+/**
+    Upon Activating the plugin this gets called. It will set the tables and options.
+**/
 function survey_activation() {
     global $wpdb;
     $survey_version = '1.0';
@@ -49,7 +52,9 @@ function survey_activation() {
     add_option('survey_version', $survey_version);
 }
 
-/*** This get's called upon deactivation ***/
+/**
+    This get's called upon deactivation of the plugin. This will cleanup the tables and options created.
+**/
 function survey_deactivation() {
     global $wpdb;
 	
@@ -62,7 +67,9 @@ function survey_deactivation() {
     delete_option('survey_version');
 }
 
-/*** Allows a shortcode to be created that will add the survey to the page. The shortcode is [survey-page] ***/
+/**
+    Allows a shortcode to be created that will add the survey to the page. The shortcode is [survey-page id=123] 
+**/
 add_shortcode('survey-page','survey_page');
 function survey_page($atts, $content=null) {
     $survey = new survey($atts['id']);
@@ -70,7 +77,9 @@ function survey_page($atts, $content=null) {
     $survey->output_survey();
 }
 
-
+/**
+    Allows a shortcode to be created that will create a test survey with sample data. Debug use only!
+**/
 add_shortcode('survey-test','survey_test');
 function survey_test($atts, $content=null) {
     debug($_POST);
@@ -119,9 +128,19 @@ function survey_test($atts, $content=null) {
     }
 }
 
-/*** Adds the survey-style CSS file to the header ***/
+/**
+    Adds the survey-style CSS file to the header 
+**/
 add_action('wp_print_styles', 'survey_css');
 function survey_css() {
     wp_register_style("survey_style_css", plugins_url('survey-style.css', __FILE__));
 	wp_enqueue_style("survey_style_css");
+}
+
+/**
+    Adds an option page for configuring the surveys. 
+**/
+function survey_add_admin_link() {
+    add_options_page('Survey Configuration', 'Survey Configuration', 'manage_options', 
+                     'SurveyOptionsPage', 'survey_show_admin_page'); 
 }
