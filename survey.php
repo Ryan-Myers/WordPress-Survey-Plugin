@@ -9,15 +9,15 @@ Author URI: http://ryanmyers.ca
 */
 
 require_once 'survey-admin.php';
-require_once 'survey-include.php';
 require_once 'survey-class.php';
 require_once 'survey-question-class.php';
+require_once 'survey-js.php';
 
 register_activation_hook(__FILE__, 'survey_activation');
 register_deactivation_hook(__FILE__, 'survey_deactivation');
-add_action('admin_menu', 'survey_add_admin_link');
 add_action('wp_ajax_survey_select_ajax', 'survey_select_ajax_callback');
 add_action('wp_ajax_survey_add_question_ajax', 'survey_add_question_ajax_callback');
+add_action('wp_ajax_survey_submit_question_ajax', 'survey_submit_question_ajax_callback');
 
 /**
     Upon Activating the plugin this gets called. It will set the tables and options.
@@ -140,7 +140,18 @@ function survey_css() {
 /**
     Adds an option page for configuring the surveys. 
 **/
+add_action('admin_menu', 'survey_add_admin_link');
 function survey_add_admin_link() {
-    add_options_page('Survey Configuration', 'Survey Configuration', 'manage_options', 
-                     'SurveyOptionsPage', 'survey_show_admin_page'); 
+    $plugin_page = add_options_page('Survey Configuration', 'Survey Configuration', 'manage_options', 
+                     'SurveyOptionsPage', 'survey_show_admin_page');
+    
+    //Add the javascript
+    add_action( "admin_head-{$plugin_page}", 'survey_admin_js');
+}
+
+/**
+    Quick and dirty variable output.
+**/
+function debug($var) {
+    echo '<pre>'.print_r($var, true)."</pre>\n";
 }
