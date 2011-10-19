@@ -33,32 +33,32 @@ if (current_user_can('manage_options')) { ?>
             jQuery('#survey-admin-page').html(response);
             jQuery('#survey-questions-table').slideUp();
             jQuery('#survey-add-question').slideDown(400, function(){
-				//Default to hiding the question setup until they select a question type.
-				jQuery('#questionsetup').hide();
-				jQuery('#save_question').attr('onclick', 'submit_question('+survey_id+')');
-				
-				//When the dropdown list changes, this gets called.
-				jQuery("#qtype").change(function(){
-					var qtype = jQuery("#qtype option:selected").val();
-					switch(qtype) {
-						case "0":
-							//If it's still the default selection then don't display any part of the question.
-							jQuery('#questionsetup').slideUp();
-							break;
-						case "1": //True/False
-						case "5": //Short Answer
-						case "6": //Long Answer
-							//Don't show the answers for questions that don't have any.
-							jQuery('#answers').hide();
-							jQuery('#questionsetup').slideDown();
-							break;
-						default:
-							//Show the answers for every other question type.
-							jQuery('#answers').slideDown();
-							jQuery('#questionsetup').slideDown();
-					}
-				});
-			});
+                //Default to hiding the question setup until they select a question type.
+                jQuery('#questionsetup').hide();
+                jQuery('#save_question').attr('onclick', 'submit_question('+survey_id+')');
+                
+                //When the dropdown list changes, this gets called.
+                jQuery("#qtype").change(function(){
+                    var qtype = jQuery("#qtype option:selected").val();
+                    switch(qtype) {
+                        case "0":
+                            //If it's still the default selection then don't display any part of the question.
+                            jQuery('#questionsetup').slideUp();
+                            break;
+                        case "1": //True/False
+                        case "5": //Short Answer
+                        case "6": //Long Answer
+                            //Don't show the answers for questions that don't have any.
+                            jQuery('#answers').hide();
+                            jQuery('#questionsetup').slideDown();
+                            break;
+                        default:
+                            //Show the answers for every other question type.
+                            jQuery('#answers').slideDown();
+                            jQuery('#questionsetup').slideDown();
+                    }
+                });
+            });
         });
     }
     
@@ -85,9 +85,9 @@ if (current_user_can('manage_options')) { ?>
             jQuery('#survey-add-question').slideUp();
             jQuery('#survey-questions-table').slideDown();
         });
-		
-		//Return the question list after saving the question.
-		select_survey(survey_id);
+        
+        //Return the question list after saving the question.
+        select_survey(survey_id);
     }
         
     //When the Add Answer button is pressed, this will get called.
