@@ -5,6 +5,22 @@
 function survey_admin_js() {
 if (current_user_can('manage_options')) { ?>
 <script type="text/javascript">
+    //
+    function show_surveys() {
+        var data = {
+            action: 'surveys_ajax',
+            security: '<?php echo wp_create_nonce("surveys_nonce"); ?>',
+        };
+            
+        // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
+        jQuery.post(ajaxurl, data, function(response) {
+            jQuery('#survey-admin-page').html(response);
+            jQuery('#survey-questions-table').slideUp();
+            jQuery('#survey-table').slideDown();
+        });
+    }
+    
+    //Show the questions contained within the selected survey.
     function select_survey(survey_id) {
         var data = {
             action: 'survey_select_ajax',
@@ -36,6 +52,7 @@ if (current_user_can('manage_options')) { ?>
                 //Default to hiding the question setup until they select a question type.
                 jQuery('#questionsetup').hide();
                 jQuery('#save_question').attr('onclick', 'submit_question('+survey_id+')');
+                jQuery('#cancel_question').attr('onclick', 'select_survey('+survey_id+')');
                 
                 //When the dropdown list changes, this gets called.
                 jQuery("#qtype").change(function(){

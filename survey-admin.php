@@ -33,6 +33,17 @@ function survey_show_admin_page() {
 }
 
 /**
+    Ajax enabled version of the above function. Called when cancel button is clicked in adding questions page.
+**/
+function survey_surveys_ajax_callback() {
+    check_ajax_referer('surveys_nonce', 'security');
+    
+    survey_show_admin_page();
+    
+    die();// this is required to return a proper result
+}
+
+/**
     This gets called from the survey question selection ajax, and outputs the list of questions for that survey.
 **/
 function survey_select_ajax_callback() {
@@ -62,6 +73,7 @@ function survey_select_ajax_callback() {
         
     echo "</tbody></table><br />";
     echo "<input type='button' value='Add New Question' onclick='add_question($survey_id)' />";
+    echo "<input type='button' value='Cancel' onclick='show_surveys()' />";
     
 	die(); // this is required to return a proper result
 }
@@ -101,6 +113,7 @@ function survey_add_question_ajax_callback() {
                 </div>
                 <input id="save_question" type="button" value="Save Question" onclick="submit_question(1)" />
             </div>
+            <input id="cancel_question" type="button" value="Cancel" onclick="select_survey(1)" />
         </div>
     </form>
     <?php
