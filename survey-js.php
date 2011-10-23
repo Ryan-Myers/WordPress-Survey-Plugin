@@ -102,7 +102,6 @@ if (current_user_can('manage_options')) { ?>
         jQuery.post(ajaxurl, data, function(response) {
             jQuery('#survey-add-question').slideUp();
             jQuery('#survey-admin-page').html(response);
-            jQuery('#survey-questions-table').slideDown();
         });
         
         //Return the question list after saving the question.
@@ -164,6 +163,11 @@ if (current_user_can('manage_options')) { ?>
         //Modify the Number next to the textbox to show how many answers there are.
         var answernum = clone.children('.answernumber');
         jQuery(answernum).text((parseInt(answernum.html().substring(0, 1)) + 1) + ". ");
+        
+        //Make sure new answers use the default "answer" name instead of the possible answer with id name.
+        var answertextbox = clone.children(':text');
+        jQuery(answertextbox).attr('name', 'answer');
+        jQuery(answertextbox).val(''); //Blank the value box as well.
         
         //Add the new clone to the list, and remove the button that was pressed so only one remains.
         jQuery('#answers').append(clone);

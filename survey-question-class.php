@@ -92,6 +92,17 @@ class question {
         }
     }
     
+    public function edit_answer($answer_id, $answer) {
+        global $wpdb;
+        
+        if (isset($this->answers[$answer_id])) {
+            $this->answers[$answer_id]->answer = $answer;
+            
+            $wpdb->update($wpdb->prefix.'survey_answers', array('answer'=>$answer), 
+                          array('id'=>$answer_id), array('%s'), array('%d'));
+        }
+    }
+    
     public function get_question() {
         $output = "<div class='question-container'>\n".
                   "  <div class='question'>{$this->question}</div>\n".

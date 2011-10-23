@@ -115,15 +115,17 @@ function survey_add_question_ajax_callback() {
         wp_die( __('You do not have sufficient permissions to access this page.') );
     }
     
+    //If this is being edited, the question id will be posted.
     if (isset($_POST['question'])) {
         $query = "SELECT question,questiontype FROM {$wpdb->prefix}survey_questions WHERE id=%d";
         $row = $wpdb->get_row($wpdb->prepare($query, intval($_POST['question'])));
         $qt = intval($row->questiontype);
         
-        $query = "SELECT answer FROM {$wpdb->prefix}survey_answers WHERE question=%d AND hidden=0 ORDER BY ordernum";
+        $query = "SELECT id,answer FROM {$wpdb->prefix}survey_answers WHERE question=%d AND hidden=0 ORDER BY ordernum";
         $answers = $wpdb->get_results($wpdb->prepare($query, intval($_POST['question'])), ARRAY_N);
     }
     else {
+        //Default these values to noting to allow things to progress later one.
         $row->question = '';
         $answers[0][0] = "";
     }
@@ -146,20 +148,29 @@ function survey_add_question_ajax_callback() {
                 <br />
                 <div id="answers">
                 <?php
+                    //If this is being edited, it will output an answer class for each answer already existing.
                     $answer_count = count($answers);
                     $count = 1;
-                    foreach($answers as $answer) { ?>
-                        <div class="answer">
-                            <span class="answernumber"><?php echo $count; ?>.</span>
-                            <input type="text" name="answer" value="<?php echo $answer[0]; ?>" />
-                            <?php
+                    foreach($answers as $answer) { 
+                        echo "<div class='answer'>".
+                             "<span class='answernumber'>{$count}.</span>";
+                        
+                        //If this is being edited, make the name like 1-answer where 1 is the answer id.
+                        //Also use the value of that answer as the default.
+                        if (isset($_POST['question'])) {
+                            echo "<input type='text' name='{$answer[0]}-answer' value='{$answer[1]}' />";
+                        }
+                        else {
+                            echo "<input type='text' name='answer' />";
+                        }
                             
-                            if ($count == $answer_count) { ?>
-                                <input type="button" value="Add Answer" onclick="add_answer(this)" />
-                            <?php }
-                            
-                            $count++; ?>
-                        </div> <?php
+                        //Only show the Add Answer button on the last answer.
+                        if ($count == $answer_count) {
+                            echo '<input type="button" value="Add Answer" onclick="add_answer(this)" />';
+                        }
+                        
+                        echo '</div>';
+                        $count++; 
                     }
                 ?>
                 </div>
@@ -167,6 +178,11 @@ function survey_add_question_ajax_callback() {
             </div>
             <input id="cancel_question" type="button" value="Cancel" onclick="select_survey(1)" />
         </div>
+        <?php
+            //This will create a hidden value containing the question id if this is being edited.
+            if (isset($_POST['question'])) 
+                echo '<input type="hidden" name="survey_edit" value="'.intval($_POST['question']).'" />';
+        ?>
     </form>
     <?php
     
@@ -184,18 +200,35 @@ function survey_submit_question_ajax_callback() {
     //Set up the basic structure for the question array.
     $question = array('qtype'=>'', 'qtext'=>'', 'answers'=>array());
     
+    //This array will keep track of all of the answer ids being edited.
+    $edit = array();
+    
     //Fill in the array properly using the posted data.
     foreach($_POST['question'] as $posted) {
+        //If the name is answer then it's a brand new answer and not being edited.
         if ($posted['name'] == 'answer') {
             $question['answers'][] = $posted['value'];
         }
+        //If the name is like 1-answer, the 1 would be the answer id to edit.
+        elseif (strstr($posted['name'], '-answer') !== FALSE) {
+            $answer_id = strstr($posted['name'], '-answer', TRUE);
+            $question['answers'][$answer_id] = $posted['value'];
+            $edit[] = $answer_id;
+        }
+        //Otherwise it's not an answer at all and something else.
         else {
             $question[$posted['name']] = $posted['value'];
         }
     }
     
-    $qobject = new question(false, $question['qtype'], $question['qtext']);
-        
+    //If the question is being edited, then this will use the id of that question to create the qobject.
+    if (isset($question['survey_edit'])) {
+        $qobject = new question(intval($question['survey_edit']));
+    }
+    else {
+        $qobject = new question(false, $question['qtype'], $question['qtext']);
+    }
+    
     switch ($question['qtype']) {
         case question::truefalse:
         case question::shortanswer:
@@ -203,17 +236,24 @@ function survey_submit_question_ajax_callback() {
             //These question types don't have answers.
             break;
         default:
-            foreach ($question['answers'] as $answer) {
-                $qobject->add_answer($answer);
+            foreach ($question['answers'] as $answer_id=>$answer) {
+                //If the answer id is in the array, then it must be edited, otherwise it's a new answer.
+                if (in_array($answer_id, $edit)) {
+                    $qobject->edit_answer($answer_id, $answer);
+                }
+                else {
+                    $qobject->add_answer($answer);
+                }
             }
     }
     
-    $survey = new survey($_POST['survey']);
-    $survey->add_qobject($qobject);
+    //Don't add a new question to the survey list if it's being edited.
+    if (!isset($question['survey_edit'])) {
+        $survey = new survey($_POST['survey']);
+        $survey->add_qobject($qobject);
+    }
     
-    debug($_POST);
-    
-    echo "Question added to the survey!";
+    echo "Success!";
     
     die();// this is required to return a proper result
 }
