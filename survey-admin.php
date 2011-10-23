@@ -16,7 +16,7 @@ function survey_show_admin_page() {
     echo "<h2>Survey Configuration</h2><div id='survey-admin-page' class='wrap'>
             <table id='survey-table' border='3' cellspacing='10'>
                 <thead style='font-weight:bold'>
-                    <tr><td></td><td>Name</td><td>Questions</td><td>Questions Per Page</td><td></td></tr>
+                    <tr><td></td><td>Name</td><td>Questions</td><td>Questions Per Page</td><td></td><td></td></tr>
                 </thead>
                 <tbody>";
     
@@ -27,6 +27,7 @@ function survey_show_admin_page() {
                   "  <td>".count(explode(',', $survey->questions))."</td>\n".
                   "  <td>{$survey->questionsperpage}</td>\n".
                   "  <td><input type='button' value='Edit Name' onclick='edit_survey({$survey->id})' /></td>\n".
+                  "  <td><input type='button' value='Delete Survey' onclick='delete_survey({$survey->id})' /></td>\n".
                   "</tr>\n";
     }
 
@@ -60,6 +61,38 @@ function survey_edit_ajax_callback() {
                   array('name'=>stripslashes($_POST['val'])), //Strip the slashes that the AJAX call seems to add.
                   array('id'=>intval($_POST['survey'])), 
                   array('%s'), array('%d'));
+    
+    die();
+}
+
+/**
+    This gets called when deleteing a survey. It simply deletes the survey and all of its questions.
+    
+    TODO: In the future, if the ability to use the same question in multiple surveys happens, 
+    this will need to be fixed.
+**/
+function survey_delete_ajax_callback() {
+    global $wpdb;
+    check_ajax_referer('survey_delete_nonce', 'security');
+    
+    //Make sure they're logged in with the appropriate permissions.
+    if (!current_user_can('manage_options'))  {
+        wp_die( __('You do not have sufficient permissions to access this page.') );
+    }
+    
+    $survey_id = intval($_POST['survey']);
+    
+    //Gather the comma seperated list of questions form the survey table.
+    $questions = $wpdb->get_var($wpdb->prepare("SELECT questions FROM {$wpdb->prefix}survey WHERE id=%d", $survey_id));
+    
+    //For every question, delete it and all of it's answers.
+    foreach (explode(',', $questions) as $question_id) {
+        $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}survey_questions WHERE id=%d", $question_id));
+        $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}survey_answers WHERE question=%d", $question_id));
+    }
+    
+    //Finally, delete the survey itself.
+    $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}survey WHERE id=%d", $survey_id));
     
     die();
 }

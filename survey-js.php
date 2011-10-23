@@ -128,6 +128,23 @@ if (current_user_can('manage_options')) { ?>
         
     }
     
+    function delete_survey(survey_id) {
+        var data = {
+            action: 'survey_delete_ajax',
+            security: '<?php echo wp_create_nonce("survey_delete_nonce"); ?>',
+            survey: survey_id
+        };
+        
+        var answer = confirm("Are you sure you want to delete this survey?");
+        
+        if (answer) {
+            jQuery.post(ajaxurl, data, function(response){
+                //Slide up the table row for the delete survey after deleting it.
+                jQuery('#survey-'+survey_id).slideUp();
+            });
+        }
+    }
+    
     function save_survey(button, survey_id) {
         var edit = jQuery(button);
         edit.attr('value', 'Edit Name');
@@ -175,8 +192,12 @@ if (current_user_can('manage_options')) { ?>
     }
         
     function remove_answer(button) {
+        var clone = jQuery(button).clone();
+        
         //Remove the selected answer.
         jQuery(button).parent().remove();
+        
+        
     }
 </script>
 <?php
