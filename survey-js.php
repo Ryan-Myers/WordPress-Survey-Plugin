@@ -5,7 +5,7 @@
 function survey_admin_js() {
 if (current_user_can('manage_options')) { ?>
 <script type="text/javascript">
-    //
+    //Simply return to the page that shows surveys.
     function show_surveys() {
         var data = {
             action: 'surveys_ajax',
@@ -14,8 +14,8 @@ if (current_user_can('manage_options')) { ?>
             
         // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
         jQuery.post(ajaxurl, data, function(response) {
-            jQuery('#survey-admin-page').html(response);
             jQuery('#survey-questions-table').slideUp();
+            jQuery('#survey-admin-page').html(response);
             jQuery('#survey-table').slideDown();
         });
     }
@@ -30,27 +30,28 @@ if (current_user_can('manage_options')) { ?>
             
         // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
         jQuery.post(ajaxurl, data, function(response) {
-            jQuery('#survey-admin-page').html(response);
             jQuery('#survey-table').slideUp();
+            jQuery('#survey-admin-page').html(response);
             jQuery('#survey-questions-table').slideDown();
         });
     }
         
     //Add a new question to the passed survey
-    function add_question(survey_id) {
+    function add_question(survey_id, question_id) {
         var data = {
             action: 'survey_add_question_ajax',
             security: '<?php echo wp_create_nonce("survey_add_question_nonce"); ?>',
-            survey: survey_id
+            survey: survey_id,
+            question: question_id
         };
             
         // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
         jQuery.post(ajaxurl, data, function(response) {
-            jQuery('#survey-admin-page').html(response);
             jQuery('#survey-questions-table').slideUp();
+            jQuery('#survey-admin-page').html(response);
             jQuery('#survey-add-question').slideDown(400, function(){
                 //Default to hiding the question setup until they select a question type.
-                jQuery('#questionsetup').hide();
+                if (!question_id) jQuery('#questionsetup').hide();
                 jQuery('#save_question').attr('onclick', 'submit_question('+survey_id+')');
                 jQuery('#cancel_question').attr('onclick', 'select_survey('+survey_id+')');
                 
@@ -79,6 +80,7 @@ if (current_user_can('manage_options')) { ?>
         });
     }
     
+    //Called when finished creating a question. This will add it to the survey and return to the questions list.
     function submit_question(survey_id) {
         var form_data;
         
@@ -98,15 +100,59 @@ if (current_user_can('manage_options')) { ?>
         
         // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
         jQuery.post(ajaxurl, data, function(response) {
-            jQuery('#survey-admin-page').html(response);
             jQuery('#survey-add-question').slideUp();
+            jQuery('#survey-admin-page').html(response);
             jQuery('#survey-questions-table').slideDown();
         });
         
         //Return the question list after saving the question.
         select_survey(survey_id);
     }
+    
+    function create_textbox(id, value) {
+        var textbox = document.createElement('input');
+        textbox.type = 'text';
+        textbox.value = value;
+        textbox.id = id;
+        textbox.name = id;
         
+        return textbox;
+    }
+    
+    function edit_survey(survey_id) {
+        var name = jQuery('#survey-'+survey_id+' :nth-child(2)');
+        name.html(create_textbox('name-'+survey_id,  name.text()));
+        
+        var edit = jQuery('#survey-'+survey_id+' :nth-child(5)').children(':first-child');
+        edit.attr('value', 'Save');
+        edit.attr('onclick', 'save_survey(this, '+survey_id+')');
+        
+    }
+    
+    function save_survey(button, survey_id) {
+        var edit = jQuery(button);
+        edit.attr('value', 'Edit Name');
+        edit.attr('onclick', 'edit_survey('+survey_id+')');
+        
+        var name = jQuery('#survey-'+survey_id+' :nth-child(2)');
+        var value = name.children(':first-child').val();
+        name.html(value);
+        
+        var data = {
+            action: 'survey_edit_ajax',
+            security: '<?php echo wp_create_nonce("survey_edit_nonce"); ?>',
+            survey: survey_id,
+            val: value
+        };
+        
+        // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
+        jQuery.post(ajaxurl, data);
+    }
+    
+    function edit_question(survey_id, question_id) {
+        add_question(survey_id, question_id);
+    }
+    
     //When the Add Answer button is pressed, this will get called.
     function add_answer(button) {
         //Grab the parent of the passed button, which should be the answer class.

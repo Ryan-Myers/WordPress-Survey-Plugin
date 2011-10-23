@@ -19,6 +19,7 @@ add_action('wp_ajax_surveys_ajax', 'survey_surveys_ajax_callback');
 add_action('wp_ajax_survey_select_ajax', 'survey_select_ajax_callback');
 add_action('wp_ajax_survey_add_question_ajax', 'survey_add_question_ajax_callback');
 add_action('wp_ajax_survey_submit_question_ajax', 'survey_submit_question_ajax_callback');
+add_action('wp_ajax_survey_edit_ajax', 'survey_edit_ajax_callback');
 
 /**
     Upon Activating the plugin this gets called. It will set the tables and options.
