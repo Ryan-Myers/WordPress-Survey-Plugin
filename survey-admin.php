@@ -117,15 +117,16 @@ function survey_select_ajax_callback() {
     $questions = explode(',', $wpdb->get_var($wpdb->prepare($query, $survey_id)));
         
     echo "<table id='survey-questions-table' border='3' cellspacing='10' style='display:none'>".
-         "<thead style='font-weight:bold'><tr><td>Question</td><td>Question Type</td><td></td></tr></thead><tbody>";
+    "<thead style='font-weight:bold'><tr><td>Question</td><td>Question Type</td><td></td><td></td></tr></thead><tbody>";
         
     foreach ($questions as $question_id) {
         $query = "SELECT question,questiontype FROM {$wpdb->prefix}survey_questions WHERE id=%d";
         $row = $wpdb->get_row($wpdb->prepare($query, $question_id));
-        echo "<tr>\n".
+        echo "<tr id='question-{$question_id}'>\n".
              "  <td>{$row->question}</td>\n".
              "  <td>{$row->questiontype}</td>\n".
              "  <td><input type='button' value='Edit' onclick='edit_question($survey_id, $question_id)' /></td>\n".
+             "  <td><input type='button' value='Delete' onclick='delete_question($survey_id, $question_id)' /></td>\n".
              "</tr>\n";
     }
         
@@ -134,6 +135,43 @@ function survey_select_ajax_callback() {
     echo "<input type='button' value='Cancel' onclick='show_surveys()' />";
     
 	die(); // this is required to return a proper result
+}
+
+/**
+    This gets called when deleting a question. 
+    Deletes the question, answer and removes all references to it from the survey.
+**/
+function survey_question_delete_ajax_callback() {
+    global $wpdb;
+    check_ajax_referer('survey_question_delete_nonce', 'security');
+    
+    //Make sure they're logged in with the appropriate permissions.
+    if (!current_user_can('manage_options'))  {
+        wp_die( __('You do not have sufficient permissions to access this page.') );
+    }
+    
+    $survey_id = intval($_POST['survey']);
+    $question_id = intval($_POST['question']);
+    
+    //Gather the comma seperated list of questions form the survey table.
+    $questions = $wpdb->get_var($wpdb->prepare("SELECT questions FROM {$wpdb->prefix}survey WHERE id=%d", $survey_id));
+    
+    //Make the questions an array and remove the question id being deleted, then impode it again.
+    $questions = implode(',', array_diff(explode(',', $questions), array($question_id)));
+    
+    //Put the new list of questions back into the survey.
+    $wpdb->update($wpdb->prefix.'survey', 
+                array('questions'=>$questions), 
+                array('id'=>$survey_id), 
+                array('%s'), array('%d'));
+    
+    //Delete all of the answers to this question.
+    $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}survey_answers WHERE question=%d", $question_id));
+    
+    //Finally, delete the question itself.
+    $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}survey_questions WHERE id=%d", $question_id));
+    
+    die();
 }
 
 /**

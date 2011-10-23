@@ -169,6 +169,24 @@ if (current_user_can('manage_options')) { ?>
         add_question(survey_id, question_id);
     }
     
+    function delete_question(survey_id, question_id) {
+        var data = {
+            action: 'survey_question_delete_ajax',
+            security: '<?php echo wp_create_nonce("survey_question_delete_nonce"); ?>',
+            survey: survey_id,
+            question: question_id
+        };
+        
+        var answer = confirm("Are you sure you want to delete this question?");
+        
+        if (answer) {
+            jQuery.post(ajaxurl, data, function(response){
+                //Slide up the table row for the delete survey after deleting it.
+                jQuery('#question-'+question_id).slideUp();
+            });
+        }
+    }
+    
     //When the Add Answer button is pressed, this will get called.
     function add_answer(button) {
         //Grab the parent of the passed button, which should be the answer class.
