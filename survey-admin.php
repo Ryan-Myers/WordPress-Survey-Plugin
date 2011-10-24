@@ -295,6 +295,8 @@ function survey_submit_question_ajax_callback() {
     //If the question is being edited, then this will use the id of that question to create the qobject.
     if (isset($question['survey_edit'])) {
         $qobject = new question(intval($question['survey_edit']));
+        $qobject->edit_question($question['qtext']);
+        $qobject->edit_type($question['qtype']);
     }
     else {
         $qobject = new question(false, $question['qtype'], $question['qtext']);

@@ -92,6 +92,22 @@ class question {
         }
     }
     
+    public function edit_question($question) {
+        global $wpdb;
+        
+        $this->question = $question;
+        $wpdb->update($wpdb->prefix.'survey_questions', array('question'=>$question), 
+                    array('id'=>$this->id), array('%s'), array('%d'));
+    }
+    
+    public function edit_type($qtype) {
+        global $wpdb;
+        
+        $this->questiontype = $qtype;
+        $wpdb->update($wpdb->prefix.'survey_questions', array('questiontype'=>$qtype), 
+                    array('id'=>$this->id), array('%s'), array('%d'));
+    }
+    
     public function edit_answer($answer_id, $answer) {
         global $wpdb;
         

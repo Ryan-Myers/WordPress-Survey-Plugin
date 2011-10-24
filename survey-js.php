@@ -101,12 +101,10 @@ if (current_user_can('manage_options')) { ?>
         
         // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
         jQuery.post(ajaxurl, data, function(response) {
-            jQuery('#survey-add-question').slideUp();
             jQuery('#survey-admin-page').html(response);
+            //Return the question list after saving the question.
+            select_survey(survey_id);
         });
-        
-        //Return the question list after saving the question.
-        select_survey(survey_id);
     }
     
     function create_textbox(id, value) {
