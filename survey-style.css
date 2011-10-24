@@ -6,3 +6,6 @@
     font-weight: bold;
     font-size: 14pt;
 }
+#questionsetup input[type=text] {
+    width: 200px;
+}

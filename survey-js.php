@@ -4,6 +4,7 @@
 **/
 function survey_admin_js() {
 if (current_user_can('manage_options')) { ?>
+<link rel="stylesheet" href="<?php echo plugins_url('survey-style.css', __FILE__); ?>" type="text/css" />
 <script type="text/javascript">
     //Simply return to the page that shows surveys.
     function show_surveys() {
@@ -139,7 +140,7 @@ if (current_user_can('manage_options')) { ?>
         
         if (answer) {
             jQuery.post(ajaxurl, data, function(response){
-                //Slide up the table row for the delete survey after deleting it.
+                //Slide up the table row for the survey after deleting it.
                 jQuery('#survey-'+survey_id).slideUp();
             });
         }
@@ -181,7 +182,7 @@ if (current_user_can('manage_options')) { ?>
         
         if (answer) {
             jQuery.post(ajaxurl, data, function(response){
-                //Slide up the table row for the delete survey after deleting it.
+                //Slide up the table row for the question after deleting it.
                 jQuery('#question-'+question_id).slideUp();
             });
         }
