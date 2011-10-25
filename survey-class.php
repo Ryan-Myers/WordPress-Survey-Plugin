@@ -5,6 +5,7 @@ class survey {
     public $questions = "";
     public $qobjects = array(); //array of question objects
     public $questionsperpage;
+    public $pages;
 	public $answers = array();
     
     public function __construct($id, $name = "", $questionsperpage = 10) {
@@ -22,8 +23,14 @@ class survey {
                 $this->questionsperpage = $row->questionsperpage;
                 
                 //Transform the comma seperated list of questions id's into an array, 
-                //and then create a question object for each one.
                 $questions = explode(',', $this->questions);
+                //Double check that it's not empty. Exploding nothing will create a single entry with an empty string.
+                $questions = (!empty($questions)) ? $questions : array();
+                
+                //Get the number of pages by dividing the questions by questions per page and rounding up.
+                $this->pages = ceil(count($questions) / $this->questionsperpage);
+                
+                //Create a question object for each question.
                 foreach ($questions as $question_id) {
                     $this->add_qobject(new question($question_id));
                 }
@@ -80,6 +87,9 @@ class survey {
         //Add the question ids to the questions string.
         $this->add_question_id($qobject->id);
         
+        //Modify the number of pages by dividing the questions by questions per page and rounding up.
+        $this->pages = ceil(count(explode(',', $this->questions)) / $this->questionsperpage);
+        
         return $qobject;
     }
     
@@ -108,17 +118,32 @@ class survey {
                       array('id'=>$this->id), array('%s'), array('%d'));
     }
 	
-	public function output_survey() {
-		$output = "<form method='post' action='{$_SERVER["REQUEST_URI"]}' id='survey-form'>\n";
-		
-		foreach ($this->qobjects as $question) {
-			$output .= $question->get_question();
-		}
+	public function output_survey($page = 1) {
+        $question_start = (($page * $this->questionsperpage) - $this->questionsperpage) + 1;
+        $question_end = $question_start + $this->questionsperpage - 1 ;
         
+        //Don't output anything if we're past the last page.
+        if ($question_start > count($this->qobjects)) {
+            return false;
+        }
+        
+        //If the question end is greater than the number of questions, then it should only go to the last question.
+        if ($question_end > count($this->qobjects)) {
+            $question_end = count($this->qobjects);
+        }
+        
+        $output = "<h3>$this->name</h3>\n";    
+		$output .= "<form id='survey-form'>\n";
+        
+		for ($i = $question_start; $i <= $question_end; $i++) {
+            $output .= $this->qobjects[$i]->get_question();
+        }
+                
 		$output .= "<input type='hidden' name='survey-id' value='{$this->id}' />\n";
+        $output .= "<input type='hidden' name='survey-page' value='{$page}' />\n";
 		$output .= "<input type='submit' id='survey-submit' value='Submit' />\n</form>";
-		
-		echo $output;
+        
+        return $output;
 	}
 	
 	public function get_answers() {	

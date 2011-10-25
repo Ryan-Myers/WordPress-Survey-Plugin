@@ -79,7 +79,9 @@ add_shortcode('survey-page','survey_page');
 function survey_page($atts, $content=null) {
     $survey = new survey($atts['id']);
     
-    $survey->output_survey();
+    for ($i = 1; $i <= $survey->pages; $i++) {
+        echo $survey->output_survey($i);
+    }
 }
 
 /**
