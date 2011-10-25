@@ -6,7 +6,7 @@ class survey {
     public $qobjects = array(); //array of question objects
     public $questionsperpage;
     public $pages;
-	public $answers = array();
+    public $answers = array();
     
     public function __construct($id, $name = "", $questionsperpage = 10) {
         global $wpdb;
@@ -117,8 +117,8 @@ class survey {
         $wpdb->update($wpdb->prefix.'survey', array('questions'=>$this->questions), 
                       array('id'=>$this->id), array('%s'), array('%d'));
     }
-	
-	public function output_survey($page = 1) {
+    
+    public function output_survey($page = 1) {
         $question_start = (($page * $this->questionsperpage) - $this->questionsperpage) + 1;
         $question_end = $question_start + $this->questionsperpage - 1 ;
         
@@ -133,24 +133,24 @@ class survey {
         }
         
         $output = "<h3>$this->name</h3>\n";    
-		$output .= "<form id='survey-form'>\n";
+        $output .= "<form id='survey-form'>\n";
         
-		for ($i = $question_start; $i <= $question_end; $i++) {
+        for ($i = $question_start; $i <= $question_end; $i++) {
             $output .= $this->qobjects[$i]->get_question();
         }
                 
-		$output .= "<input type='hidden' name='survey-id' value='{$this->id}' />\n";
+        $output .= "<input type='hidden' name='survey-id' value='{$this->id}' />\n";
         $output .= "<input type='hidden' name='survey-page' value='{$page}' />\n";
-		$output .= "<input type='submit' id='survey-submit' value='Submit' />\n</form>";
+        $output .= "<input type='submit' id='survey-submit' value='Submit' />\n</form>";
         
         return $output;
-	}
-	
-	public function get_answers() {	
-		foreach ($this->qobjects as $question) {
-			$this->answers[$question->id] = $question->get_answer();
-		}
-		
-		return $this->answers;
-	}
+    }
+    
+    public function get_answers() {    
+        foreach ($this->qobjects as $question) {
+            $this->answers[$question->id] = $question->get_answer();
+        }
+        
+        return $this->answers;
+    }
 }

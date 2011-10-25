@@ -62,7 +62,7 @@ function survey_activation() {
 **/
 function survey_deactivation() {
     global $wpdb;
-	
+    
     //Remove the created tables for this plugin
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
@@ -141,7 +141,7 @@ function survey_test($atts, $content=null) {
 add_action('wp_print_styles', 'survey_css');
 function survey_css() {
     wp_register_style("survey_style_css", plugins_url('survey-style.css', __FILE__));
-	wp_enqueue_style("survey_style_css");
+    wp_enqueue_style("survey_style_css");
 }
 
 /**
