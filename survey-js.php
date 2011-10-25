@@ -21,6 +21,30 @@ if (current_user_can('manage_options')) { ?>
         });
     }
     
+    function create_survey() {
+        var survey_name = jQuery('[name="new-survey-name"]').val();
+        
+        var data = {
+            action: 'survey_create_ajax',
+            security: '<?php echo wp_create_nonce("survey_create_nonce"); ?>',
+            name: survey_name
+        };
+            
+        // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
+        jQuery.post(ajaxurl, data, function(survey_id) {            
+            var tr = "<tr id='survey-{$survey->id}'>"+
+                     "  <td><input type='button' value='Select' onclick='select_survey("+survey_id+")' /></td>"+
+                     "  <td>"+survey_name+"</td>"+
+                     "  <td>0</td>"+
+                     "  <td>10</td>"+
+                     "  <td><input type='button' value='Edit Name' onclick='edit_survey("+survey_id+")' /></td>"+
+                     "  <td><input type='button' value='Delete Survey' onclick='delete_survey("+survey_id+")' /></td>"+
+                     "</tr>";
+                     
+            jQuery('#survey-table tbody').append(tr);
+        });
+    }
+    
     //Show the questions contained within the selected survey.
     function select_survey(survey_id) {
         var data = {

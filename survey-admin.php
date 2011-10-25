@@ -21,17 +21,48 @@ function survey_show_admin_page() {
                 <tbody>";
     
     foreach ($surveys as $survey) {
-        echo      "<tr id='survey-{$survey->id}'>\n".
-                  "  <td><input type='button' value='Select' onclick='select_survey({$survey->id})' /></td>\n".
-                  "  <td>{$survey->name}</td>\n".
-                  "  <td>".count(explode(',', $survey->questions))."</td>\n".
-                  "  <td>{$survey->questionsperpage}</td>\n".
-                  "  <td><input type='button' value='Edit Name' onclick='edit_survey({$survey->id})' /></td>\n".
-                  "  <td><input type='button' value='Delete Survey' onclick='delete_survey({$survey->id})' /></td>\n".
-                  "</tr>\n";
+        //questions_count is here to account for an empty list of questions. 
+        //If it's empty the array still contains an empty string, which would get counted as one question.
+        $questions_count = explode(',', $survey->questions);
+        $questions_count = (empty($questions_count[0])) ? 0 : count($questions_count);
+        
+        echo    "<tr id='survey-{$survey->id}'>\n".
+                "  <td><input type='button' value='Select' onclick='select_survey({$survey->id})' /></td>\n".
+                "  <td>{$survey->name}</td>\n".
+                "  <td>{$questions_count}</td>\n".
+                "  <td>{$survey->questionsperpage}</td>\n".
+                "  <td><input type='button' value='Edit Name' onclick='edit_survey({$survey->id})' /></td>\n".
+                "  <td><input type='button' value='Delete Survey' onclick='delete_survey({$survey->id})' /></td>\n".
+                "</tr>\n";
     }
 
-    echo "</tbody></table></div>";
+    echo    "</tbody>".
+            "<tfoot>".
+            "<tr>".
+            "  <td>New Survey:</td>".
+            "  <td colspan='3'><input type='text' name='new-survey-name' /></td>".
+            "  <td><input type='button' value='Add Survey' onclick='create_survey()' /></td>".
+            "</tr>".
+            "</tfoot>".
+            "</table></div>";
+}
+
+/**
+    Called when creating a new survey. Currently only gets passed the name, and returns the survey's ID.
+**/
+function survey_create_ajax_callback() {
+    check_ajax_referer('survey_create_nonce', 'security');
+    
+    //Make sure they're logged in with the appropriate permissions.
+    if (!current_user_can('manage_options'))  {
+        wp_die( __('You do not have sufficient permissions to access this page.') );
+    }
+    
+    $survey = new survey(FALSE, $_POST['name']);
+    
+    echo $survey->id; //Echo the survey id as a way of passing it back to the page.
+    
+    die();// this is required to return a proper result
 }
 
 /**
@@ -115,10 +146,14 @@ function survey_select_ajax_callback() {
         
     //Explode the questions into an array.
     $questions = explode(',', $wpdb->get_var($wpdb->prepare($query, $survey_id)));
-        
+    
+    if (empty($questions[0])) {
+        $questions = array();
+    }
+    
     echo "<table id='survey-questions-table' border='3' cellspacing='10' style='display:none'>".
     "<thead style='font-weight:bold'><tr><td>Question</td><td>Question Type</td><td></td><td></td></tr></thead><tbody>";
-        
+    
     foreach ($questions as $question_id) {
         $query = "SELECT question,questiontype FROM {$wpdb->prefix}survey_questions WHERE id=%d";
         $row = $wpdb->get_row($wpdb->prepare($query, $question_id));

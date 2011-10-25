@@ -9,3 +9,6 @@
 #questionsetup input[type=text] {
     width: 200px;
 }
+input[name=new-survey-name] {
+    width: 300px;
+}
