@@ -132,8 +132,8 @@ class survey {
             $question_end = count($this->qobjects);
         }
         
-        $output = "<h3>$this->name</h3>\n";    
-        $output .= "<form id='survey-form'>\n";
+        
+        $output = "<form id='survey-form-page-$page' style='display:none'>\n";
         
         for ($i = $question_start; $i <= $question_end; $i++) {
             $output .= $this->qobjects[$i]->get_question();
@@ -141,7 +141,9 @@ class survey {
                 
         $output .= "<input type='hidden' name='survey-id' value='{$this->id}' />\n";
         $output .= "<input type='hidden' name='survey-page' value='{$page}' />\n";
-        $output .= "<input type='submit' id='survey-submit' value='Submit' />\n</form>";
+        $output .= "<input type='button' id='survey-next-page-{$page}' value='Next Page' ".
+                   "onclick='survey_page({$page}, {$this->pages})' />\n";
+        $output .= "</form>";
         
         return $output;
     }

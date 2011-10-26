@@ -11,7 +11,7 @@ Author URI: http://ryanmyers.ca
 require_once 'survey-admin.php';
 require_once 'survey-class.php';
 require_once 'survey-question-class.php';
-require_once 'survey-js.php';
+require_once 'survey-js-admin.php';
 
 register_activation_hook(__FILE__, 'survey_activation');
 register_deactivation_hook(__FILE__, 'survey_deactivation');
@@ -79,6 +79,8 @@ add_shortcode('survey-page','survey_page');
 function survey_page($atts, $content=null) {
     $survey = new survey($atts['id']);
     
+    echo "<h3>$survey->name</h3>\n";   
+    
     for ($i = 1; $i <= $survey->pages; $i++) {
         echo $survey->output_survey($i);
     }
@@ -142,6 +144,15 @@ add_action('wp_print_styles', 'survey_css');
 function survey_css() {
     wp_register_style("survey_style_css", plugins_url('survey-style.css', __FILE__));
     wp_enqueue_style("survey_style_css");
+}
+
+/**
+    Adds the survey-js javascript file to the header.
+**/
+add_action('wp_enqueue_scripts', 'survey_add_script');
+function survey_add_script() {
+    wp_register_script("survey_script_js", plugins_url('survey-js.php', __FILE__));
+    wp_enqueue_script("survey_script_js");
 }
 
 /**
