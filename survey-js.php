@@ -1,35 +1,53 @@
 <?php header("Content-type: text/javascript"); @require_once('../../../wp-config.php'); ?>
 
+//When the screen loads default to showing the first page.
 jQuery(document).ready(function(){
     jQuery('#survey-form-page-1').show();
 });
 
-function survey_page(page, lastpage) {
+function survey_post_form_data(page) {
     var form_data;
     
-    //Set up how to handle the form being submitted
+    //Set up how to handle the form being submitted. This fills in the form data with a serialized array.
     jQuery('#survey-form-page-'+page).submit(function() {
         form_data = jQuery(this).serializeArray();
         return false;
     });
-        
+    
+    //Submit the form to get the data into form_data.
     jQuery('#survey-form-page-'+page).submit();
     
-    if (page < lastpage) { 
-        jQuery('#survey-form-page-'+page).hide();
-        jQuery('#survey-form-page-'+(page+1)).show();
-    }
-    
-    if ((page+1) == lastpage) {
-        jQuery('#survey-next-page-'+(page+1)).val('Submit');
-    }
-    
+    //Set up an array of data to post over ajax.
     var data = {
         page: page,
-        question: form_data
+        form: form_data
     };
     
+    //Posts to survey-js-ajax.php
     jQuery.post('<?php echo plugins_url("survey-js-ajax.php", __FILE__); ?>', data, function(response){
-        alert(response);
+        console.log(response);
     });
+}
+
+function survey_next_page(page, lastpage) {
+    var nextpage;
+    nextpage = page+1;
+    
+    //As long as this isn't the last page, hide the current page and show the next page.
+    if (page < lastpage) { 
+        jQuery('#survey-form-page-'+page).hide();
+        jQuery('#survey-form-page-'+nextpage).show();
+    }
+    
+    //If it's now on the last page, change the "Next Page" button to say "Submit".
+    if (nextpage == lastpage) {
+        jQuery('#survey-next-page-'+nextpage).val('Submit');
+        jQuery('#survey-next-page-'+nextpage).attr('onclick', 'survey_submit('+lastpage+')');
+    }
+    
+    survey_post_form_data(page);
+}
+
+function survey_submit(page) {
+    survey_post_form_data(page);
 }

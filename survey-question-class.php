@@ -215,32 +215,32 @@ class question {
         return $output;
     }
     
-    public function get_answer() {
+    public function get_answer($posted) {
         switch ($this->questiontype) {
             case self::truefalse:
-                if (isset($_POST["tf-{$this->id}"])) {
+                if (isset($posted["tf-{$this->id}"])) {
                     //Sets the answer to true/false as a string.
-                    $this->answer = $_POST["tf-{$this->id}"];
+                    $this->answer = $posted["tf-{$this->id}"];
                 }
             break;
             
             case self::multichoice:
-                if (isset($_POST["mc-{$this->id}"])) { 
+                if (isset($posted["mc-{$this->id}"])) { 
                     //Sets the answer to the answer text.
-                    $this->answer = $this->answers[$_POST["mc-{$this->id}"]]->answer;
+                    $this->answer = $this->answers[$posted["mc-{$this->id}"]]->answer;
                 }
             break;
             
             case self::dropdown:
-                if (isset($_POST["dd-{$this->id}"])) { 
+                if (isset($posted["dd-{$this->id}"])) { 
                     //Sets the answer to the answer text.
-                    $this->answer = $this->answers[$_POST["dd-{$this->id}"]]->answer;
+                    $this->answer = $this->answers[$posted["dd-{$this->id}"]]->answer;
                 }
             break;
             
             case self::multiselect:
-                if (isset($_POST["ms-{$this->id}"])) { 
-                    $answers = $_POST["ms-{$this->id}"];
+                if (isset($posted["ms-{$this->id}"])) { 
+                    $answers = $posted["ms-{$this->id}"];
                     
                     //Sets the answer to an array of the answers.
                     $this->answer = array();
@@ -251,22 +251,22 @@ class question {
             break;
             
             case self::shortanswer:
-                if (isset($_POST["sa-{$this->id}"])) {
+                if (isset($posted["sa-{$this->id}"])) {
                     //Set the answer to the short answer text.
-                    $this->answer = $_POST["sa-{$this->id}"];
+                    $this->answer = $posted["sa-{$this->id}"];
                 }
             break;
             
             case self::longanswer:
-                if (isset($_POST["la-{$this->id}"])) {
+                if (isset($posted["la-{$this->id}"])) {
                     //Set the answer to the long answer text.
-                    $this->answer = $_POST["la-{$this->id}"];
+                    $this->answer = $posted["la-{$this->id}"];
                 }
             break;
             
             case self::multichoiceother:
-                if (isset($_POST["mco-{$this->id}"])) {
-                    $answer = $_POST["mco-{$this->id}"];
+                if (isset($posted["mco-{$this->id}"])) {
+                    $answer = $posted["mco-{$this->id}"];
                     
                     if ($answer != "other") {
                         //Treat like a normal multiple choice answer.
@@ -274,14 +274,14 @@ class question {
                     }
                     else {
                         //If it's the other selection, grab the text from the other box as the answer.
-                        $this->answer = $_POST["mco-other-{$this->id}"];
+                        $this->answer = $posted["mco-other-{$this->id}"];
                     }
                 }
             break;
             
             case self::multiselectother:
-                if (isset($_POST["mso-{$this->id}"])) {
-                    $answers = $_POST["mso-{$this->id}"];
+                if (isset($posted["mso-{$this->id}"])) {
+                    $answers = $posted["mso-{$this->id}"];
                     
                     //Sets the answer to an array of the answers.
                     $this->answer = array();
@@ -292,7 +292,7 @@ class question {
                         }
                         else {
                             //If it's the other selection, grab the text from the other box as the answer.
-                            $this->answer[] = $_POST["mso-other-{$this->id}"];
+                            $this->answer[] = $posted["mso-other-{$this->id}"];
                         }
                     }
                 }

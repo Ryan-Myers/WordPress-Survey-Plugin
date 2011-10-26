@@ -142,15 +142,31 @@ class survey {
         $output .= "<input type='hidden' name='survey-id' value='{$this->id}' />\n";
         $output .= "<input type='hidden' name='survey-page' value='{$page}' />\n";
         $output .= "<input type='button' id='survey-next-page-{$page}' value='Next Page' ".
-                   "onclick='survey_page({$page}, {$this->pages})' />\n";
+                   "onclick='survey_next_page({$page}, {$this->pages})' />\n";
         $output .= "</form>";
         
         return $output;
     }
     
-    public function get_answers() {    
-        foreach ($this->qobjects as $question) {
-            $this->answers[$question->id] = $question->get_answer();
+    public function get_answers($posted) {
+        //Gather a list of the question ids into an array.
+        $question_ids = array();
+        foreach($posted as $question_id=>$answer) {
+            if ($question_id != 'survey-id' && $question_id != 'survey-page') {
+                $question_ids[] = substr($question_id, strrpos($question_id, '-') + 1);
+            }
+        }
+        
+        //Only use unique values.
+        $question_ids = array_unique($question_ids);
+        
+        foreach ($question_ids as $question_id) {
+            //Since the qobjects aren't index by id, we need to loop through them and find the one with id we want.
+            foreach ($this->qobjects as $question) {
+                if ($question->id == $question_id) {
+                    $this->answers[$question_id] = $question->get_answer($posted);
+                }
+            }
         }
         
         return $this->answers;
