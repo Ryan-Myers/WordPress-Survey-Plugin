@@ -157,11 +157,9 @@ class survey {
             }
         }
         
-        //Only use unique values.
-        $question_ids = array_unique($question_ids);
-        
-        foreach ($question_ids as $question_id) {
-            //Since the qobjects aren't index by id, we need to loop through them and find the one with id we want.
+        //Only use unique values.        
+        foreach (array_unique($question_ids) as $question_id) {
+            //Since the qobjects aren't indexed by id, we need to loop through them and find the one with id we want.
             foreach ($this->qobjects as $question) {
                 if ($question->id == $question_id) {
                     $this->answers[$question_id] = $question->get_answer($posted);

@@ -52,6 +52,21 @@ function survey_activation() {
     `ordernum` SMALLINT NOT NULL ,
     `hidden` BOOLEAN NOT NULL DEFAULT  '0')");
     
+    $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_users` (
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+    `username` VARCHAR( 30 ) NOT NULL ,
+    `password` BINARY( 20 ) NOT NULL,
+    `fullname` VARCHAR( 50 ) NOT NULL ,
+    `physician` INT NOT NULL ,
+    UNIQUE (`username`))");
+    
+    $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_physicians` (
+    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+    `username` VARCHAR( 30 ) NOT NULL ,
+    `password` BINARY( 20 ) NOT NULL ,
+    `fullname` VARCHAR( 50 ) NOT NULL ,
+    UNIQUE (`username`))");
+    
     //Add the survey version to the wordpress options table. 
     //Useful for making sure they're on the latest version, and for adding proper upgrade paths.
     add_option('survey_version', $survey_version);
@@ -67,6 +82,8 @@ function survey_deactivation() {
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_physicians");
     
     //Remove the survey version from the wordpress options table.
     delete_option('survey_version');
@@ -87,10 +104,49 @@ function survey_page($atts, $content=null) {
 }
 
 /**
+    Allows a shortcode to be created that will create a registration page. The shortcode is [survey-registration] 
+**/
+add_shortcode('survey-registration','survey_registration');
+function survey_registration($atts, $content=null) {    
+    if (isset($_POST['username'])) {
+        debug($_POST);
+    }
+    else {
+        echo "<h3>Registration Page</h3>\n";   
+        echo "<form action='{$_SERVER['REQUEST_URI']}' method='post'>".
+        "<div id='survey-registration'>".
+        "  <div id='survey-username'><span>Username:</span> <input type='text' name='username' maxlength='30' /></div>".
+        "  <div id='survey-password'><span>Password:</span> <input type='password' name='password' maxlength='20' /></div>".
+        "  <div id='survey-fullname'><span>Full Name:</span> <input type='text' name='fullname' maxlength='50' /></div>".
+        "  <div id='survey-submit'><input type='submit' value='Submit' /></div>".
+        "</div>".
+        "</form>";
+    }
+}
+
+/**
     Allows a shortcode to be created that will create a test survey with sample data. Debug use only!
 **/
 add_shortcode('survey-test','survey_test');
 function survey_test($atts, $content=null) {
+    global $wpdb;
+    
+    $insert = $wpdb->insert($wpdb->prefix.'survey_users', 
+                            array('username'=>'test_user6', 'password'=>sha1('test', true), 
+                                  'fullname'=>'Test User', 'physician'=>1), 
+                            array('%s', '%s', '%s', '%d'));
+                            
+    $id = $insert ? $wpdb->insert_id : FALSE;
+    
+    if ($id !== FALSE) {
+        var_dump(bin2hex(sha1('test', true)));
+        var_dump(bin2hex($wpdb->get_var("SELECT password FROM {$wpdb->prefix}survey_users WHERE id=$id")));
+    }
+    else {
+        echo "Failed to insert!";
+        var_dump(sha1('test', true));
+    }
+    
     debug($_POST);
     
     $survey1 = new survey(FALSE, "Survey 1");
