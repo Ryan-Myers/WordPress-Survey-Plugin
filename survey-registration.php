@@ -10,8 +10,8 @@ function set_survey_user_session() {
         $date = date('Y-m-d H:i:s');
         
         //Cookies expires in 1 hour.
-        $id = setcookie('survey_user_id', $user_id, time()+60*60*1);
-        $dc = setcookie('survey_date', $date, time()+60*60*1);    
+        $id = setcookie('survey_u', $user_id, time()+60*60*1);
+        $dc = setcookie('survey_hash', sha1($date), time()+60*60*1);    
         
         if (!$id || !$dc) {
             error_log("Failed to set cookie!");
@@ -30,14 +30,14 @@ function set_survey_user_session() {
 function get_survey_user_session() {
     global $wpdb;
     
-    $user_id = intval($_COOKIE['survey_user_id']);
-    $logged_id = $_COOKIE['survey_date'];
+    $user_id = intval($_COOKIE['survey_u']);
+    $logged_in = $_COOKIE['survey_hash'];
     
     $query = $wpdb->prepare("SELECT logged_in FROM {$wpdb->prefix}survey_users WHERE id=%d", $user_id);
     $db_logged_in = $wpdb->get_var($query);
     
     //If the logged in time is the same as the one in the database, and it hasn't been an hour yet they're good.
-    if ($db_logged_in == $logged_in && strtotime($date) < (time()+60*60*1)) {
+    if (sha1($db_logged_in) == $logged_in && strtotime($db_logged_in) < (time()+60*60*1)) {
         return $user_id;
     }
     
@@ -75,6 +75,8 @@ function survey_registration($atts, $content=null) {
         global $survey_register_output;
         
         echo $survey_register_output;
+        
+        var_dump(get_survey_user_session());
     }
     else {
         echo "<h3>Registration Page</h3>\n". 
