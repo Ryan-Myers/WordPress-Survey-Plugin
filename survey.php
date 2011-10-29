@@ -12,6 +12,7 @@ require_once 'survey-admin.php';
 require_once 'survey-class.php';
 require_once 'survey-question-class.php';
 require_once 'survey-js-admin.php';
+require_once 'survey-registration.php';
 
 register_activation_hook(__FILE__, 'survey_activation');
 register_deactivation_hook(__FILE__, 'survey_deactivation');
@@ -23,6 +24,9 @@ add_action('wp_ajax_survey_create_ajax', 'survey_create_ajax_callback');
 add_action('wp_ajax_survey_edit_ajax', 'survey_edit_ajax_callback');
 add_action('wp_ajax_survey_delete_ajax', 'survey_delete_ajax_callback');
 add_action('wp_ajax_survey_question_delete_ajax', 'survey_question_delete_ajax_callback');
+
+global $survey_salt;
+$survey_salt = '92e0d8723fa997f83edd4f2df260844db24847e6';
 
 /**
     Upon Activating the plugin this gets called. It will set the tables and options.
@@ -55,9 +59,10 @@ function survey_activation() {
     $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_users` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
     `username` VARCHAR( 30 ) NOT NULL ,
-    `password` BINARY( 20 ) NOT NULL,
+    `password` BINARY( 20 ) NOT NULL ,
     `fullname` VARCHAR( 50 ) NOT NULL ,
     `physician` INT NOT NULL ,
+    `logged_in` DATETIME NULL ,
     UNIQUE (`username`))");
     
     $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_physicians` (
@@ -65,6 +70,7 @@ function survey_activation() {
     `username` VARCHAR( 30 ) NOT NULL ,
     `password` BINARY( 20 ) NOT NULL ,
     `fullname` VARCHAR( 50 ) NOT NULL ,
+    `logged_in` DATETIME NULL ,
     UNIQUE (`username`))");
     
     //Add the survey version to the wordpress options table. 
@@ -79,9 +85,9 @@ function survey_deactivation() {
     global $wpdb;
     
     //Remove the created tables for this plugin
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
+    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
+    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
+    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_physicians");
     
@@ -100,27 +106,6 @@ function survey_page($atts, $content=null) {
     
     for ($i = 1; $i <= $survey->pages; $i++) {
         echo $survey->output_survey($i);
-    }
-}
-
-/**
-    Allows a shortcode to be created that will create a registration page. The shortcode is [survey-registration] 
-**/
-add_shortcode('survey-registration','survey_registration');
-function survey_registration($atts, $content=null) {    
-    if (isset($_POST['username'])) {
-        debug($_POST);
-    }
-    else {
-        echo "<h3>Registration Page</h3>\n";   
-        echo "<form action='{$_SERVER['REQUEST_URI']}' method='post'>".
-        "<div id='survey-registration'>".
-        "  <div id='survey-username'><span>Username:</span> <input type='text' name='username' maxlength='30' /></div>".
-        "  <div id='survey-password'><span>Password:</span> <input type='password' name='password' maxlength='20' /></div>".
-        "  <div id='survey-fullname'><span>Full Name:</span> <input type='text' name='fullname' maxlength='50' /></div>".
-        "  <div id='survey-submit'><input type='submit' value='Submit' /></div>".
-        "</div>".
-        "</form>";
     }
 }
 
