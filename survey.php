@@ -100,12 +100,19 @@ function survey_deactivation() {
 **/
 add_shortcode('survey-page','survey_page');
 function survey_page($atts, $content=null) {
-    $survey = new survey($atts['id']);
+    $user_id = get_survey_user_session();
     
-    echo "<h3>$survey->name</h3>\n";   
-    
-    for ($i = 1; $i <= $survey->pages; $i++) {
-        echo $survey->output_survey($i);
+    if ($user_id !== FALSE) {
+        $survey = new survey($atts['id']);
+        
+        echo "<h3>$survey->name</h3>\n";   
+        
+        for ($i = 1; $i <= $survey->pages; $i++) {
+            echo $survey->output_survey($i);
+        }
+    }
+    else {
+        survey_registration(NULL);
     }
 }
 
