@@ -1,5 +1,12 @@
 <?php
 @require_once('../../../wp-config.php');
+global $wpdb;
+
+$user_id = get_survey_user_session();
+
+if ($user_id === FALSE) {
+    die(); //Don't do anything if they aren't logged in.
+}
 
 //Set up the form data in a way that's more accessible.
 $form = array();
@@ -17,8 +24,28 @@ $survey = new survey($form['survey-id']);
 
 $answers = $survey->get_answers($form);
 
-debug($_POST);
-debug($form);
+//Save each answer into the database.
+foreach ($answers as $question_id=>$answer) {
+    //Answers can be an array, so just seperate the answers by a comma and space if they are.
+    if (is_array($answer)) $answer = implode(', ', $answer);
+    
+    $query = "SELECT answer FROM {$wpdb->prefix}survey_user_answers WHERE user=%d AND question=%d";
+    $prepared = $wpdb->prepare($query, $user_id, $question_id);
+    $answered = $wpdb->get_var($prepared);
+    
+    if ($answered === NULL) {
+        $wpdb->insert($wpdb->prefix."survey_user_answers", 
+                      array('user'=>$user_id, 'question'=>$question_id, 'answer'=>$answer), array('%d', '%d', '%s'));
+        echo "inserted";
+    }
+    elseif($answered !== NULL && $answer != $answered) {
+        $wpdb->update($wpdb->prefix."survey_user_answers", 
+                      array('answer'=>$answer), array('user'=>$user_id, 'question'=>$question_id), 
+                      array('%s'), array('%d', '%d', '%s'));
+        echo "updated";
+    }
+}
+
 debug($answers);
 
 die();//Must die to properly return the results.

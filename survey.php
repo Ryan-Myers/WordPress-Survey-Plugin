@@ -65,6 +65,13 @@ function survey_activation() {
     `logged_in` DATETIME NULL ,
     UNIQUE (`username`))");
     
+    $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_user_answers` (
+    `user` INT NOT NULL ,
+    `question` INT NOT NULL ,
+    `answer` TEXT NULL DEFAULT NULL
+    PRIMARY KEY (  `user` ,  `question` )
+    )");
+    
     $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_physicians` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
     `username` VARCHAR( 30 ) NOT NULL ,
@@ -89,6 +96,7 @@ function survey_deactivation() {
     //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
     //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_user_answers");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_physicians");
     
     //Remove the survey version from the wordpress options table.
