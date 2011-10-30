@@ -1,26 +1,29 @@
 <?php
-
+/**
+    This creates an action that runs every time the init action is called. 
+    Which should be once for every page before any output. 
+    This is important because cookies can't be set after something has been output.
+**/
 add_action('init', 'set_survey_user_session');
 function set_survey_user_session() {
     global $wpdb;
     
-    if (isset($_POST['survey_username-l']) && survey_login_user()) {
-        $username = $_POST['survey_username-l'];
+    $user_id = FALSE;
+    
+    if (isset($_POST['survey_username-l'])) {
+        $user_id =survey_login_user();
+    }
+    elseif (isset($_POST['survey_username-r'])) {
+        $user_id = survey_register_user();
     }
     
-    if (isset($_POST['survey_username-r']) && survey_register_user()) {
-        $username = $_POST['survey_username-r'];
-    }
-    
-    if (isset($username)) {
-        $query = "SELECT id FROM {$wpdb->prefix}survey_users WHERE username=%s";
-        $user_id = $wpdb->get_var($wpdb->prepare($query, $username));
+    if ($user_id !== FALSE) {
         $date = date('Y-m-d H:i:s');
-        
+            
         //Cookies expires in 1 hour.
-        $id = setcookie('survey_u', $user_id, time()+60*60*1);
-        $dc = setcookie('survey_hash', sha1($date), time()+60*60*1);    
-        
+        $id = setcookie('survey_u', $user_id, time()+60*60*1, '/');
+        $dc = setcookie('survey_hash', sha1($date), time()+60*60*1, '/');    
+            
         if (!$id || !$dc) {
             error_log("Failed to set cookie!");
             return FALSE;
@@ -35,6 +38,9 @@ function set_survey_user_session() {
     return TRUE;
 }
 
+/**
+    Checks to see if the user is logged in, and if they are return their user id. Otherwise return false.
+**/
 function get_survey_user_session() {
     global $wpdb;
     
@@ -54,40 +60,85 @@ function get_survey_user_session() {
     return FALSE;
 }
 
+/**
+    Attempt to log the user in. Return the user id if successful and false if not.
+**/
 function survey_login_user() {
     global $wpdb;
     global $survey_salt;
     global $survey_register_output;
     
-    $survey_register_output .= print_r($_POST, true);
+    $query = "SELECT id FROM {$wpdb->prefix}survey_users WHERE username=%s AND password=%s";
+    $prepared = $wpdb->prepare($query, $_POST['survey_username-l'], sha1($_POST['survey_password-l'], true));
+    
+    $user_id = $wpdb->get_var($prepared);
+    
+    if ($user_id !== NULL) {
+        return $user_id;
+    }
+    
+    return FALSE;
 }
 
+/**
+    Log out the user by setting the cookies to expire in the past, causing them to be deleted.
+**/
+function survey_logout_user() {
+    setcookie('survey_u', '', time()-3600, '/');
+    setcookie('survey_hash', '', time()-3600, '/');
+}
+
+/**
+    Attempt to register user. Return the user id if successful and false if not.
+**/
 function survey_register_user() {
     global $wpdb;
     global $survey_salt;
     global $survey_register_output;
     
-    $insert = $wpdb->insert($wpdb->prefix.'survey_users', 
-                            array('username'=>$_POST['survey_username-r'], 
-                                  'password'=>sha1($_POST['survey_password-r'].$survey_salt, true), 
-                                  'fullname'=>$_POST['survey_fullname-r'], 'physician'=>$_POST['survey_physician-r']), 
-                            array('%s', '%s', '%s', '%d'));
+    $continue = TRUE;
     
-    if ($insert !== FALSE) {
-        $survey_register_output .= "<div id='survey-registration-success'>Survey Registration Success!</div>";
-        $survey_register_output .= print_r($_POST, true);
-        return TRUE;
+    if (strlen($_POST['survey_username-r']) < 6) {
+        $survey_register_output .= "<div>Registration failed. Your username must me at least 6 characters.</div>";
+        $continue = FALSE;
     }
-    else {
-        $survey_register_output .= "<div id='survey-registration-failed'>Survey Registration Failed. ".
-                                   "Try a different username.</div>";
-        $survey_register_output .= print_r($_POST, true);
-        return FALSE;
+    if (strlen($_POST['survey_password-r']) < 6) {
+        $survey_register_output .= "<div>Registration failed. Your password must me at least 6 characters.</div>";
+        $continue = FALSE;
     }
+    if (strlen($_POST['survey_fullname-r']) == 0) {
+        $survey_register_output .= "<div>Registration failed. You must enter your full name.</div>";
+        $continue = FALSE;
+    }
+    if ($_POST['survey_physician-r'] == 0) {
+        $survey_register_output .= "<div>Registration failed. You must select a physician.</div>";
+        $continue = FALSE;
+    }
+    
+    if ($continue) {
+        $insert = $wpdb->insert($wpdb->prefix.'survey_users', 
+                                array('username'=>$_POST['survey_username-r'], 
+                                      'password'=>sha1($_POST['survey_password-r'].$survey_salt, true), 
+                                      'fullname'=>$_POST['survey_fullname-r'], 'physician'=>$_POST['survey_physician-r']), 
+                                array('%s', '%s', '%s', '%d'));
+        
+        if ($insert !== FALSE) {
+            $survey_register_output .= "<div id='survey-registration-success'>Survey Registration Success!</div>";
+            
+            return $wpdb->insert_id;
+        }
+        else {
+            $survey_register_output .= "<div id='survey-registration-failed'>Survey Registration Failed. ".
+                                       "Try a different username.</div>";
+        }
+    }
+    
+    return FALSE;
 }
 
 /**
-    Allows a shortcode to be created that will create a registration page. The shortcode is [survey-registration] 
+    Allows a shortcode to be created that will create a registration page. The shortcode is [survey-registration].
+    This can also be called as a function on the survey page.
 **/
 add_shortcode('survey-registration','survey_registration');
 function survey_registration($atts, $content=null) {
@@ -95,8 +146,8 @@ function survey_registration($atts, $content=null) {
     
     echo <<<HTML
     {$survey_register_output}
-    <h3>Login / Registration Page</h3> 
     <form id='survey-registration' action='{$_SERVER['REQUEST_URI']}' method='post'>
+        <h3>Register</h3> 
         <div id='survey-r'>
             <div id='survey-username'>
                 <span>Username:</span> <input type='text' name='survey_username-r' maxlength='30' />
@@ -112,6 +163,7 @@ function survey_registration($atts, $content=null) {
         </div>
     </form>
     <form id='survey-login' action='{$_SERVER['REQUEST_URI']}' method='post'>
+        <h3>Login</h3> 
         <div id='survey-l'>
             <div id='survey-username-l'>
                 <span>Username:</span> <input type='text' name='survey_username-l' maxlength='30' />

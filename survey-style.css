@@ -12,3 +12,9 @@
 input[name=new-survey-name] {
     width: 300px;
 }
+#survey-registration {
+    float:left;
+}
+#survey-login {
+    float:right;
+}
