@@ -69,7 +69,7 @@ function survey_login_user() {
     global $survey_register_output;
     
     $query = "SELECT id FROM {$wpdb->prefix}survey_users WHERE username=%s AND password=%s";
-    $prepared = $wpdb->prepare($query, $_POST['survey_username-l'], sha1($_POST['survey_password-l'], true));
+    $prepared = $wpdb->prepare($query,$_POST['survey_username-l'],sha1($_POST['survey_password-l'].$survey_salt, true));
     
     $user_id = $wpdb->get_var($prepared);
     
