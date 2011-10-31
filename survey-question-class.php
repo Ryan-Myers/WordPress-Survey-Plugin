@@ -35,6 +35,8 @@ class question {
                 $query = "SELECT id, answer, ordernum ".
                          "FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0 ORDER BY ordernum";
                 $this->answers = $wpdb->get_results($wpdb->prepare($query, $this->id), OBJECT_K);
+                
+                $this->set_answer();
             }
         }
         //If false was passed for id, instead build a new question
@@ -126,9 +128,13 @@ class question {
         
         switch ($this->questiontype) {
             case self::truefalse:
+                //Automatically select the answer if it's already been answered.
+                $true = ($this->answer == "true") ? "checked='checked'" : "";
+                $false = ($this->answer == "false") ? "checked='checked'" : "";
+                
                 $output .= "    <div class='tf-answer'>\n".
-                           "      <input type='radio' name='tf-{$this->id}' value='true' /> True<br />\n".
-                           "      <input type='radio' name='tf-{$this->id}' value='false' /> False\n".
+                           "      <input type='radio' name='tf-{$this->id}' value='true' $true /> True<br />\n".
+                           "      <input type='radio' name='tf-{$this->id}' value='false' $false /> False\n".
                            "    </div>\n";
             break;
             
@@ -136,7 +142,10 @@ class question {
                 $output .= "    <div class='mc-answer'>\n";
                 
                 foreach ($this->answers as $answer) {
-                    $output .= "      <input type='radio' name='mc-{$this->id}' value='{$answer->id}' /> ".
+                    //Select the answer that was previously chosen if it was.
+                    $selected = ($answer->answer == $this->answer) ? "checked='checked'" : "";
+                    
+                    $output .= "      <input type='radio' name='mc-{$this->id}' value='{$answer->id}' $selected /> ".
                                "{$answer->answer}<br />\n";
                 }
                 
@@ -147,7 +156,10 @@ class question {
                 $output .= "    <div class='dd-answer'>\n".
                            "      <select name='dd-{$this->id}'>\n";
                 foreach ($this->answers as $answer) {
-                    $output .= "        <option value='{$answer->id}'>{$answer->answer}</option>\n";
+                    //Select the answer that was previously chosen if it was.
+                    $selected = ($answer->answer == $this->answer) ? "selected='selected'" : "";
+                    
+                    $output .= "        <option value='{$answer->id}' $selected>{$answer->answer}</option>\n";
                 }
                 $output .= "      </select>\n".
                            "    </div>\n";
@@ -157,35 +169,50 @@ class question {
                 $output .= "    <div class='ms-answer'>\n";
                 
                 foreach ($this->answers as $answer) {
-                    $output .= "      <input type='checkbox' name='ms-{$this->id}[]' value='{$answer->id}' /> ".
+                    //Select the answer that was previously chosen if it was. Checks every part of the array.
+                    $checked = (in_array($answer->answer, $this->answer)) ? "checked='checked'" : "";
+                    
+                    $output .= "      <input type='checkbox' name='ms-{$this->id}[]' value='{$answer->id}' $checked/> ".
                                "{$answer->answer}<br />\n";
                 }
                 
                 $output .= "    </div>\n";
             break;
             
-            case self::shortanswer:
+            case self::shortanswer:                
                 $output .= "    <div class='sa-answer'>\n".
-                           "        <input type='text' name='sa-{$this->id}' />\n".
+                           "        <input type='text' name='sa-{$this->id}' value='{$this->answer}' />\n".
                            "    </div>\n";
             break;
                         
             case self::longanswer:
                 $output .= "    <div class='la-answer'>\n".
-                           "        <textarea cols='80' rows='10' name='la-{$this->id}'></textarea>\n".
+                           "        <textarea cols='80' rows='10' name='la-{$this->id}'>{$this->answer}</textarea>\n".
                            "    </div>\n";
             break;
             
             case self::multichoiceother:
                 $output .= "    <div class='mco-answer'>\n";
                 
+                $select_other = " ";
                 foreach ($this->answers as $answer) {
-                    $output .= "      <input type='radio' name='mco-{$this->id}' value='{$answer->id}' /> ".
+                    if ($answer->answer == $this->answer) {
+                        $selected = "checked='checked'";
+                        $select_other = "";
+                        $value = "";
+                    }
+                    elseif (!empty($this->answer) && !empty($select_other)) {
+                        $selected = "";
+                        $select_other = "checked='checked'";
+                        $value = "value='{$this->answer}'";
+                    }
+                    
+                    $output .= "      <input type='radio' name='mco-{$this->id}' value='{$answer->id}' $selected /> ".
                                "{$answer->answer}<br />\n";
                 }
-                
-                $output .= "      <input type='radio' name='mco-{$this->id}' value='other' /> ".
-                           "      Other (Please Specify): <input type='text' name='mco-other-{$this->id}' />\n";
+                                
+                $output .= "      <input type='radio' name='mco-{$this->id}' value='other' $select_other /> ".
+                           "      Other (Please Specify): <input type='text' name='mco-other-{$this->id}' $value />\n";
                 
                 $output .= "    </div>\n";
             break;
@@ -193,13 +220,29 @@ class question {
             case self::multiselectother:
                 $output .= "    <div class='mso-answer'>\n";
                 
+                $other_array = array();
                 foreach ($this->answers as $answer) {
-                     $output .= "      <input type='checkbox' name='mso-{$this->id}[]' value='{$answer->id}' /> ".
-                                "{$answer->answer}<br />\n";
+                    //Select the answer that was previously chosen if it was. Checks every part of the array.
+                    if (in_array($answer->answer, $this->answer)) {
+                        $checked = "checked='checked'";
+                        $other_array[] = $answer->answer;
+                    }
+                    else {
+                        $checked = "";
+                    }
+                    
+                    $output .= "   <input type='checkbox' name='mso-{$this->id}[]' value='{$answer->id}' $checked /> ".
+                               "{$answer->answer}<br />\n";
                 }
                 
-                $output .= "      <input type='checkbox' name='mso-{$this->id}[]' value='other' /> ".
-                           "      Other (Please Specify): <input type='text' name='mso-other-{$this->id}' />\n";
+                //Grabs the $other_array which has the value of every regular answer, and gets the difference
+                //between it, and the $this->answer array. This should give the other answer if there is one.
+                list($key, $other_val) = each(array_diff($this->answer, $other_array));
+                $other_select = (!empty($other_val)) ? "checked='checked'" : "";
+                
+                $output .= "      <input type='checkbox' name='mso-{$this->id}[]' value='other' $other_select /> ".
+                           "      Other (Please Specify): \n".
+                           "      <input type='text' name='mso-other-{$this->id}' value='{$other_val}' />\n";
                 
                 $output .= "    </div>\n";
             break;
@@ -300,5 +343,33 @@ class question {
         }
         
         return $this->answer;
+    }
+    
+    private function set_answer() {
+        global $wpdb;
+        
+        $user_id = get_survey_user_session();
+        
+        $query = "SELECT answer FROM {$wpdb->prefix}survey_user_answers WHERE user=%d AND question=%d";
+        $prepared = $wpdb->prepare($query, $user_id, $this->id);
+        
+        $answer = $wpdb->get_var($prepared);
+        
+        switch ($this->questiontype) {
+            case self::truefalse:
+            case self::multichoice:
+            case self::shortanswer:
+            case self::longanswer:
+            case self::dropdown:
+            case self::multichoiceother:
+                $this->answer = $answer;
+            break;
+            
+            case self::multiselect:
+            case self::multiselectother:                
+                //Sets the answer to an array of the answers.
+                $this->answer = explode(', ', $answer);
+            break;
+        }
     }
 }

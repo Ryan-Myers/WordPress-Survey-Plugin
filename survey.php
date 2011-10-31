@@ -61,7 +61,8 @@ function survey_activation() {
     `username` VARCHAR( 30 ) NOT NULL ,
     `password` BINARY( 20 ) NOT NULL ,
     `fullname` VARCHAR( 50 ) NOT NULL ,
-    `physician` INT NOT NULL ,
+    `physician` INT NOT NULL DEFAULT '0' ,
+    `is_physician` BOOLEAN NOT NULL DEFAULT  '0' ,
     `logged_in` DATETIME NULL ,
     UNIQUE (`username`))");
     
@@ -71,14 +72,6 @@ function survey_activation() {
     `answer` TEXT NULL DEFAULT NULL
     PRIMARY KEY (  `user` ,  `question` )
     )");
-    
-    $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_physicians` (
-    `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-    `username` VARCHAR( 30 ) NOT NULL ,
-    `password` BINARY( 20 ) NOT NULL ,
-    `fullname` VARCHAR( 50 ) NOT NULL ,
-    `logged_in` DATETIME NULL ,
-    UNIQUE (`username`))");
     
     //Add the survey version to the wordpress options table. 
     //Useful for making sure they're on the latest version, and for adding proper upgrade paths.
@@ -97,7 +90,6 @@ function survey_deactivation() {
     //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_user_answers");
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_physicians");
     
     //Remove the survey version from the wordpress options table.
     delete_option('survey_version');
