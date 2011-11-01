@@ -88,7 +88,7 @@ function survey_deactivation() {
     //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
     //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
     //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
-    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_user_answers");
     
     //Remove the survey version from the wordpress options table.
@@ -112,7 +112,6 @@ function survey_add_script() {
     wp_enqueue_script("jquery");
     wp_register_script("survey_script_js", plugins_url('survey-js.php', __FILE__));
     wp_enqueue_script("survey_script_js");
-    //wp_register_script("jquery", '/wp-includes/js/jquery/jquery.js');
 }
 
 /**

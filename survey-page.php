@@ -36,7 +36,7 @@ function survey_test($atts, $content=null) {
     $id = $insert ? $wpdb->insert_id : FALSE;
     
     if ($id !== FALSE) {
-        var_dump(bin2hex(sha1('test'.$survey_salt, true)));
+        var_dump(bin2hex(sha1('tester'.$survey_salt, true)));
         var_dump(bin2hex($wpdb->get_var("SELECT password FROM {$wpdb->prefix}survey_users WHERE id=$id")));
     }
     else {
