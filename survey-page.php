@@ -26,21 +26,22 @@ function survey_page($atts, $content=null) {
 add_shortcode('survey-test','survey_test');
 function survey_test($atts, $content=null) {
     global $wpdb;
+    global $survey_salt;
     
     $insert = $wpdb->insert($wpdb->prefix.'survey_users', 
-                            array('username'=>'test_user6', 'password'=>sha1('test', true), 
+                            array('username'=>'tester', 'password'=>sha1('tester'.$survey_salt, true), 
                                   'fullname'=>'Test User', 'physician'=>1), 
                             array('%s', '%s', '%s', '%d'));
                             
     $id = $insert ? $wpdb->insert_id : FALSE;
     
     if ($id !== FALSE) {
-        var_dump(bin2hex(sha1('test', true)));
+        var_dump(bin2hex(sha1('test'.$survey_salt, true)));
         var_dump(bin2hex($wpdb->get_var("SELECT password FROM {$wpdb->prefix}survey_users WHERE id=$id")));
     }
     else {
         echo "Failed to insert!";
-        var_dump(sha1('test', true));
+        var_dump(bin2hex(sha1('test'.$survey_salt, true)));
     }
     
     debug($_POST);
@@ -79,7 +80,7 @@ function survey_test($atts, $content=null) {
     $question8->add_answer("MSO Answer 2");
     $survey1->add_qobject($question8);
     
-    $survey1->output_survey();
+    //$survey1->output_survey();
     debug($survey1);
     
     if (isset($_POST['survey-id'])) {

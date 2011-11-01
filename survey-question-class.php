@@ -195,6 +195,9 @@ class question {
                 $output .= "    <div class='mco-answer'>\n";
                 
                 $select_other = " ";
+                $selected = "";
+                $value = "";
+                
                 foreach ($this->answers as $answer) {
                     if ($answer->answer == $this->answer) {
                         $selected = "checked='checked'";

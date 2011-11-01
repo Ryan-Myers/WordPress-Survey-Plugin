@@ -76,6 +76,9 @@ function survey_login_user() {
     if ($user_id !== NULL) {
         return $user_id;
     }
+    else {
+        $survey_register_output .= "Sorry username/password combination not valid. Please try again.";
+    }
     
     return FALSE;
 }
