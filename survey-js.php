@@ -2,6 +2,7 @@
 
 //When the screen loads default to showing the first page.
 jQuery(document).ready(function(){
+    jQuery('#survey-prev-page-1').hide();
     jQuery('#survey-form-page-1').show();
 });
 
@@ -25,7 +26,7 @@ function survey_post_form_data(page) {
     
     //Posts to survey-js-ajax.php
     jQuery.post('<?php echo plugins_url("survey-js-ajax.php", __FILE__); ?>', data, function(response){
-        console.log(response);
+        //console.log(response);
     });
 }
 
@@ -41,13 +42,34 @@ function survey_next_page(page, lastpage) {
     
     //If it's now on the last page, change the "Next Page" button to say "Submit".
     if (nextpage == lastpage) {
-        jQuery('#survey-next-page-'+nextpage).val('Submit');
-        jQuery('#survey-next-page-'+nextpage).attr('onclick', 'survey_submit('+lastpage+')');
+        jQuery('#survey-next-page-'+nextpage).val('Submit Survey');
+        jQuery('#survey-next-page-'+nextpage).attr('onclick', 'survey_finish('+lastpage+')');
     }
     
     survey_post_form_data(page);
 }
 
+function survey_prev_page(page, lastpage) {
+    var prevpage;
+    prevpage = page-1;
+    
+    //As long as this isn't the first page, hide the current page and show the previous page.
+    if (page > 1) {
+        jQuery('#survey-form-page-'+page).hide();
+        jQuery('#survey-form-page-'+prevpage).show();
+    }
+    
+    if (page == lastpage) {
+        jQuery('#survey-next-page-'+nextpage).val('Next Page');
+        jQuery('#survey-next-page-'+nextpage).attr('onclick', 'survey_submit('+lastpage+')');
+    }
+}
+
 function survey_submit(page) {
     survey_post_form_data(page);
+}
+
+function survey_finish(page) {
+    survey_post_form_data(page);
+    jQuery('#survey-complete').show();
 }

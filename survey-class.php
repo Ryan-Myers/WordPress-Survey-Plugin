@@ -141,9 +141,18 @@ class survey {
                 
         $output .= "<input type='hidden' name='survey-id' value='{$this->id}' />\n";
         $output .= "<input type='hidden' name='survey-page' value='{$page}' />\n";
+        $output .= "<input type='button' id='survey-prev-page-{$page}' value='Previous Page' ".
+                   "onclick='survey_prev_page({$page}, {$this->pages})' />\n";
         $output .= "<input type='button' id='survey-next-page-{$page}' value='Next Page' ".
                    "onclick='survey_next_page({$page}, {$this->pages})' />\n";
         $output .= "</form>";
+        
+        //Place a completion message at the end.
+        if ($page == $this->pages) {
+            $output .= "<div id='survey-complete' style='display:none'>\n".
+                       "  Your survey is now complete. You can log out now or go back and review the survey\n".
+                       "</div>";
+        }
         
         return $output;
     }

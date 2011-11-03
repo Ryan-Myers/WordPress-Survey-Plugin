@@ -10,6 +10,15 @@ function set_survey_user_session() {
     
     $user_id = FALSE;
     
+    if (isset($_GET['logout']) && $_GET['logout'] == 1) {
+        survey_logout_user();
+        
+        //Strip the get variable from the URL and redirect automatically.
+        list($page, $get) = explode('?', $_SERVER['REQUEST_URI']);
+        header("Location: $page");
+        exit;
+    }
+    
     if (isset($_POST['survey_username-l'])) {
         $user_id =survey_login_user();
     }
@@ -23,12 +32,16 @@ function set_survey_user_session() {
         //Cookies expires in 1 hour.
         $id = setcookie('survey_u', $user_id, time()+60*60*1, '/');
         $dc = setcookie('survey_hash', sha1($date), time()+60*60*1, '/');    
-            
+        
         if (!$id || !$dc) {
             error_log("Failed to set cookie!");
             return FALSE;
         }
         else {
+            //Set these variables so that they're accessible immediately without reloading.
+            $_COOKIE['survey_u'] = $user_id;
+            $_COOKIE['survey_hash'] = sha1($date);
+            
             //Update the logged in time with the same time as the cookie.
             $wpdb->update($wpdb->prefix.'survey_users', array('logged_in'=>$date), 
                           array('id'=>$user_id), array('%s'), array('%d'));
@@ -89,6 +102,9 @@ function survey_login_user() {
 function survey_logout_user() {
     setcookie('survey_u', '', time()-3600, '/');
     setcookie('survey_hash', '', time()-3600, '/');
+    //The cookies are still accessible until the page reloads, so also clear them manually.
+    $_COOKIE['survey_u'] = "";
+    $_COOKIE['survey_hash'] = "";
 }
 
 /**

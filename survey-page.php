@@ -4,13 +4,22 @@
 **/
 add_shortcode('survey-page','survey_page');
 function survey_page($atts, $content=null) {
-    $user_id = get_survey_user_session();
+    global $wpdb;
     
+    $user_id = get_survey_user_session();
     if ($user_id !== FALSE) {
         $survey = new survey($atts['id']);
         
-        echo "<h3>$survey->name</h3>\n";   
+        //Grab the users name so we can display it later.
+        $prepared = $wpdb->prepare("SELECT fullname FROM {$wpdb->prefix}survey_users WHERE id=%d", $user_id);
+        $fullname = $wpdb->get_var($prepared);
         
+        echo "<h3>$survey->name</h3>\n";
+        echo "<div id='survey-logout'>
+                You are currently logged in as $fullname, 
+                <a href='{$_SERVER['REQUEST_URI']}?logout=1'>click here to logout</a>
+              </div>";
+            
         for ($i = 1; $i <= $survey->pages; $i++) {
             echo $survey->output_survey($i);
         }
