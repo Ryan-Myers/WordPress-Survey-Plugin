@@ -19,10 +19,10 @@ function set_survey_user_session() {
         exit;
     }
     
-    if (isset($_POST['survey_username-l'])) {
+    if (isset($_POST['survey_submit-l'])) {
         $user_id =survey_login_user();
     }
-    elseif (isset($_POST['survey_username-r'])) {
+    elseif (isset($_POST['survey_submit-r'])) {
         $user_id = survey_register_user();
     }
     
@@ -109,27 +109,28 @@ function survey_logout_user() {
 
 /**
     Attempt to register user. Return the user id if successful and false if not.
+    If passed 1, it registers them as a physician.
 **/
-function survey_register_user() {
+function survey_register_user($physician=0) {
     global $wpdb;
     global $survey_salt;
     global $survey_register_output;
     
     $continue = TRUE;
     
-    if (strlen($_POST['survey_username-r']) < 6) {
-        $survey_register_output .= "<div>Registration failed. Your username must me at least 6 characters.</div>";
+    if (strlen($_POST['survey_username-r']) < 4) {
+        $survey_register_output .= "<div>Registration failed. Your username must me at least 4 characters.</div>";
         $continue = FALSE;
     }
-    if (strlen($_POST['survey_password-r']) < 6) {
-        $survey_register_output .= "<div>Registration failed. Your password must me at least 6 characters.</div>";
+    if (strlen($_POST['survey_password-r']) < 4) {
+        $survey_register_output .= "<div>Registration failed. Your password must me at least 4 characters.</div>";
         $continue = FALSE;
     }
     if (strlen($_POST['survey_fullname-r']) == 0) {
         $survey_register_output .= "<div>Registration failed. You must enter your full name.</div>";
         $continue = FALSE;
     }
-    if ($_POST['survey_physician-r'] == 0) {
+    if ($physician == 0 && $_POST['survey_physician-r'] == 0) {
         $survey_register_output .= "<div>Registration failed. You must select a physician.</div>";
         $continue = FALSE;
     }
@@ -138,8 +139,10 @@ function survey_register_user() {
         $insert = $wpdb->insert($wpdb->prefix.'survey_users', 
                                 array('username'=>$_POST['survey_username-r'], 
                                       'password'=>sha1($_POST['survey_password-r'].$survey_salt, true), 
-                                      'fullname'=>$_POST['survey_fullname-r'], 'physician'=>$_POST['survey_physician-r']), 
-                                array('%s', '%s', '%s', '%d'));
+                                      'fullname'=>$_POST['survey_fullname-r'],
+                                      'physician'=>$_POST['survey_physician-r'],
+                                      'is_physician'=>$physician), 
+                                array('%s', '%s', '%s', '%d', '%d'));
         
         if ($insert !== FALSE) {
             $survey_register_output .= "<div id='survey-registration-success'>Survey Registration Success!</div>";
@@ -193,5 +196,39 @@ function survey_registration($atts, $content=null) {
             <div id='survey-submit'><input type='submit' value='Submit' name='survey_submit-l' /></div>
         </div>
     </form>
+HTML;
+}
+
+function survey_register_physician_page() {
+    global $wpdb;
+    global $survey_register_output;
+    
+    //Make sure they're logged in with the appropriate permissions.
+    if (!current_user_can('manage_options'))  {
+        wp_die( __('You do not have sufficient permissions to access this page.') );
+    }
+    
+    if (isset($_POST['survey_submit-physician'])) {
+        survey_register_user(1);
+    }
+    
+    echo <<<HTML
+        <h2>Survey Physician Registration</h2>
+        {$survey_register_output}
+        <div id='survey-admin-page' class='wrap'>
+            <form id='survey-admin-registration' action='{$_SERVER['REQUEST_URI']}' method='post'>
+                <div id='survey-username'>
+                    <span>Username:</span> <input type='text' name='survey_username-r' maxlength='30' />
+                </div>
+                <div id='survey-password'>
+                    <span>Password:</span> <input type='password' name='survey_password-r' maxlength='20' />
+                </div>
+                <div id='survey-fullname'>
+                   <span>Full Name:</span> <input type='text' name='survey_fullname-r' maxlength='50' />
+                </div>
+                <input type='hidden' name='survey_physician-r' value='0' />
+                <div id='survey-submit-r'><input type='submit' value='Submit' name='survey_submit-physician' /></div>
+            </form>
+        </div>
 HTML;
 }

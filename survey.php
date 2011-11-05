@@ -120,10 +120,19 @@ function survey_add_script() {
 add_action('admin_menu', 'survey_add_admin_link');
 function survey_add_admin_link() {
     $plugin_page = add_options_page('Survey Configuration', 'Survey Configuration', 'manage_options', 
-                     'SurveyOptionsPage', 'survey_show_admin_page');
+                                    'SurveyOptionsPage', 'survey_show_admin_page');
     
     //Add the javascript
     add_action( "admin_head-{$plugin_page}", 'survey_admin_js');
+}
+
+/**
+    Adds an option page for configuring the surveys. 
+**/
+add_action('admin_menu', 'survey_register_physician_link');
+function survey_register_physician_link() {
+    add_options_page('Register Physician', 'Register Physician', 'manage_options', 
+                     'SurveyPhysiciansPage', 'survey_register_physician_page');
 }
 
 /**
