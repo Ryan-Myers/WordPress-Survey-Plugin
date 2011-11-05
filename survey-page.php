@@ -7,7 +7,19 @@ function survey_page($atts, $content=null) {
     global $wpdb;
     
     $user_id = get_survey_user_session();
-    if ($user_id !== FALSE) {
+    
+    $prepared = $wpdb->prepare("SELECT is_physician FROM {$wpdb->prefix}survey_users WHERE id=%d", $user_id);
+    $physician = $wpdb->get_var($prepared);
+    
+    if ($physician == 1) {
+        echo "<h3>Physician Logged in</h3>";
+        echo "<div>Select a patient from the list to view their survey</div>";
+        echo "<form action='{$_SERVER['REQUEST_URI']}' method='post'>
+                <select name='survey_patient'>".get_patients($user_id)."</select>
+                <input type='submit' value='View Patient Survey' />
+              </form>";
+    }
+    elseif ($user_id !== FALSE) {
         $survey = new survey($atts['id']);
         
         //Grab the users name so we can display it later.
