@@ -280,6 +280,28 @@ function survey_add_question_ajax_callback() {
                     }
                 ?>
                 </div>
+                <div id="dependent">
+                    <p>If this question should only be shown to users who answered another question with a particular
+                    answer, then select that question, and the answer that needed to be chosen.</p>
+                    <select id="depquestion" name="depquestion">
+                        <option value="0">Select Dependent Question</option>
+                        <?php
+                            //Gather the list of questions for this 
+                            $query = "SELECT questions FROM {$wpdb->prefix}survey WHERE id=%d";
+                            $questions = explode(',', $wpdb->get_var($wpdb->prepare($query, intval($_POST['survey']))));
+                            
+                            foreach($questions as $question) {
+                                $query = "SELECT question FROM {$wpdb->prefix}survey_questions WHERE id=%d";
+                                $qtext = $wpdb->get_var($wpdb->prepare($query, $question));
+                                
+                                echo "<option value='{$question}'>{$qtext}</option>";
+                            }
+                        ?>
+                    </select><br />
+                    <select id="depanswer" name="depanswer" style="display:none">
+                        <option value="0">Select Dependent Answer</option>
+                    </select>
+                </div>
                 <input id="save_question" type="button" value="Save Question" onclick="submit_question(1)" />
             </div>
             <input id="cancel_question" type="button" value="Cancel" onclick="select_survey(1)" />
@@ -293,6 +315,26 @@ function survey_add_question_ajax_callback() {
     <?php
     
     die();// this is required to return a proper result
+}
+
+function survey_add_dependency_ajax_callback() {
+    global $wpdb;
+    check_ajax_referer('survey_add_dependency_nonce', 'security');
+    
+    //Make sure they're logged in with the appropriate permissions.
+    if (!current_user_can('manage_options'))  {
+        wp_die( __('You do not have sufficient permissions to access this page.') );
+    }
+    
+    //Gather the list of answers for this 
+    $query = "SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE question=%d";
+    $answers = $wpdb->get_results($wpdb->prepare($query, intval($_POST['depquestion'])));
+    
+    foreach($answers as $answer) {        
+        echo "<option value='{$answer->id}'>{$answer->answer}</option>";
+    }
+    
+    die();
 }
 
 function survey_submit_question_ajax_callback() {
@@ -334,7 +376,8 @@ function survey_submit_question_ajax_callback() {
         $qobject->edit_type($question['qtype']);
     }
     else {
-        $qobject = new question(false, $question['qtype'], $question['qtext']);
+        $qobject = new question(false, $question['qtype'], $question['qtext'], 
+                                       $question['depquestion'], $question['depanswer']);
     }
     
     switch ($question['qtype']) {

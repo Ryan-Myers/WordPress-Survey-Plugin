@@ -80,7 +80,7 @@ if (current_user_can('manage_options')) { ?>
                 jQuery('#save_question').attr('onclick', 'submit_question('+survey_id+')');
                 jQuery('#cancel_question').attr('onclick', 'select_survey('+survey_id+')');
                 
-                //When the dropdown list changes, this gets called.
+                //When the question type dropdown list changes, this gets called.
                 jQuery("#qtype").change(function(){
                     var qtype = jQuery("#qtype option:selected").val();
                     switch(qtype) {
@@ -99,6 +99,33 @@ if (current_user_can('manage_options')) { ?>
                             //Show the answers for every other question type.
                             jQuery('#answers').slideDown();
                             jQuery('#questionsetup').slideDown();
+                    }
+                });
+                
+                //Gets called when dependent question dropdown list changes.
+                jQuery("#depquestion").change(function(){
+                    var depquestion = jQuery("#depquestion option:selected").val();
+                    
+                    //Show or hide the dependent answers based on this selection.
+                    if (depquestion != 0) {
+                        jQuery('#depanswer').slideDown();
+                        
+                        var depdata = {
+                            action: 'survey_add_dependency_ajax',
+                            security: '<?php echo wp_create_nonce("survey_add_dependency_nonce"); ?>',
+                            depquestion: depquestion
+                        };
+                            
+                        jQuery.post(ajaxurl, depdata, function(response) {
+                            jQuery('#depanswer').append(response);
+                        });
+                    }
+                    else {
+                        jQuery('#depanswer').slideUp();
+                        jQuery('#depanswer').
+                            empty().
+                            append('<option value="0">Select Dependent Question</option>').
+                            val('0');
                     }
                 });
             });

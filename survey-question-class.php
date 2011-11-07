@@ -56,6 +56,8 @@ class question {
             if ($this->id !== FALSE) {
                 $this->question = $questiontext;
                 $this->questiontype = $type;
+                $this->dependentquestion = $depquestion;
+                $this->dependentanswer = $depanswer;
                 $this->ordernum = $ordernum;
             }
             else {
