@@ -12,16 +12,18 @@ class question {
     public $question;
     public $questiontype;
     public $ordernum;
+    public $dependentquestion;
+    public $dependentanswer;
     public $hidden = 0;
     public $answers = array();
     public $answer = NULL;
     
-    public function __construct($id, $type = 0, $questiontext = "", $ordernum = 0) {
+    public function __construct($id, $type = 0, $questiontext = "", $depquestion = 0, $depanswer = 0, $ordernum = 0) {
         global $wpdb;
         
         //Find a question based the passed id.
         if ($id !== FALSE) {
-            $query = "SELECT id, question, questiontype, ordernum, hidden ".
+            $query = "SELECT id, question, questiontype, ordernum, dependentquestion, dependentanswer, hidden ".
                      "FROM {$wpdb->prefix}survey_questions WHERE id = %d";
             $row = $wpdb->get_row($wpdb->prepare($query, $id));
             
@@ -30,20 +32,23 @@ class question {
                 $this->question = $row->question;
                 $this->questiontype = $row->questiontype;
                 $this->ordernum = $row->ordernum;
+                $this->dependentquestion = $row->dependentquestion;
+                $this->dependentanswer = $row->dependentanswer;
                 $this->hidden = $row->hidden;
                 
                 $query = "SELECT id, answer, ordernum ".
                          "FROM {$wpdb->prefix}survey_answers WHERE question = %d AND hidden = 0 ORDER BY ordernum";
                 $this->answers = $wpdb->get_results($wpdb->prepare($query, $this->id), OBJECT_K);
                 
-                $this->set_answer();
+                $this->answer = $this->set_answer();
             }
         }
         //If false was passed for id, instead build a new question
         else {
             $insert = $wpdb->insert($wpdb->prefix.'survey_questions', 
-                                    array('question'=>$questiontext, 'questiontype'=>$type, 'ordernum'=>$ordernum), 
-                                    array('%s', '%d', '%d'));
+                                    array('question'=>$questiontext, 'questiontype'=>$type, 'ordernum'=>$ordernum,
+                                          'dependentquestion'=>$depquestion, 'dependentanswer'=>$depanswer), 
+                                    array('%s', '%d', '%d', '%d', '%d'));
             
             //Set the id of this survey to the id of the last inserted row.
             $this->id = $insert ? $wpdb->insert_id : FALSE;
@@ -358,21 +363,11 @@ class question {
         
         $answer = $wpdb->get_var($prepared);
         
-        switch ($this->questiontype) {
-            case self::truefalse:
-            case self::multichoice:
-            case self::shortanswer:
-            case self::longanswer:
-            case self::dropdown:
-            case self::multichoiceother:
-                $this->answer = $answer;
-            break;
-            
-            case self::multiselect:
-            case self::multiselectother:                
-                //Sets the answer to an array of the answers.
-                $this->answer = explode(', ', $answer);
-            break;
+        //Sets the answer to an array of the answers for multiple select questions
+        if ($this->questiontype == self::multiselect || $this->questiontype == self::multiselectother) {
+            $answer = explode(', ', $answer);
         }
+        
+        return $answer;
     }
 }

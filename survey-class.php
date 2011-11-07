@@ -58,9 +58,9 @@ class survey {
         }
     }
     
-    public function add_question($type, $questiontext = "", $ordernum = 0) {
+    public function add_question($type, $questiontext = "", $depquestion = 0, $depanswer = 0, $ordernum = 0) {
         //If you want to add a question by id, then use add_qobject(new question($id))
-        $qobject = $this->add_qobject(new question(FALSE, $type, $questiontext, $ordernum));
+        $qobject = $this->add_qobject(new question(FALSE, $type, $questiontext, $depquestion, $depanswer, $ordernum));
         
         return $qobject;
     }
