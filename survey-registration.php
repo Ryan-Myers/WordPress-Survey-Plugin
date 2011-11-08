@@ -13,8 +13,14 @@ function set_survey_user_session() {
     if (isset($_GET['logout']) && $_GET['logout'] == 1) {
         survey_logout_user();
         
-        //Strip the get variable from the URL and redirect automatically.
-        list($page, $get) = explode('?', $_SERVER['REQUEST_URI']);
+        //Strip the logout variable from the URL and redirect automatically.
+        if (strstr($_SERVER['REQUEST_URI'], "&logout=1")) {
+            list($page, $get) = explode('&logout=1', $_SERVER['REQUEST_URI']);
+        }
+        else {
+            list($page, $get) = explode('?', $_SERVER['REQUEST_URI']);
+        }
+        
         header("Location: $page");
         exit;
     }
