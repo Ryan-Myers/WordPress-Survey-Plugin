@@ -132,7 +132,6 @@ class survey {
             $question_end = count($this->qobjects);
         }
         
-        
         $output = "<form id='survey-form-page-$page' style='display:none'>\n";
         
         for ($i = $question_start; $i <= $question_end; $i++) {

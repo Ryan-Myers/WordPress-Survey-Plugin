@@ -22,7 +22,7 @@ $pdf->setPrintFooter(false);
 $pdf->AddPage();
 
 // create some HTML content
-$html = '<div style"color:#FF0000">Hello World</div>';
+$html = '<div><font color="#FF0000">Hello World</font></div>';
 
 // output the HTML content
 $pdf->writeHTML($html);

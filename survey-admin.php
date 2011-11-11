@@ -284,22 +284,32 @@ function survey_add_question_ajax_callback() {
                     <p>If this question should only be shown to users who answered another question with a particular
                     answer, then select that question, and the answer that needed to be chosen.</p>
                     <select id="depquestion" name="depquestion">
-                        <option value="0">Select Dependent Question</option>
+                        <option value="-1">Select Dependent Question</option>
                         <?php
                             //Gather the list of questions for this 
                             $query = "SELECT questions FROM {$wpdb->prefix}survey WHERE id=%d";
                             $questions = explode(',', $wpdb->get_var($wpdb->prepare($query, intval($_POST['survey']))));
                             
+                            //Double check that it's not empty. 
+                            //Exploding nothing will create a single entry with an empty string.
+                            $questions = (!empty($questions)) ? $questions : array();
+                            
                             foreach($questions as $question) {
-                                $query = "SELECT question FROM {$wpdb->prefix}survey_questions WHERE id=%d";
-                                $qtext = $wpdb->get_var($wpdb->prepare($query, $question));
+                                $query="SELECT question,questiontype FROM {$wpdb->prefix}survey_questions WHERE id=%d";
+                                $qarray = $wpdb->get_results($wpdb->prepare($query, $question));
+                                $qobject = $qarray[0];
                                 
-                                echo "<option value='{$question}'>{$qtext}</option>";
+                                //Don't display question types that can't be dependent.
+                                if ($qobject->questiontype != question::shortanswer && 
+                                    $qobject->questiontype != question::longanswer) {
+                                    
+                                    echo "<option value='{$question}'>{$qobject->question}</option>";
+                                }
                             }
                         ?>
                     </select><br />
                     <select id="depanswer" name="depanswer" style="display:none">
-                        <option value="0">Select Dependent Answer</option>
+                        <option value="-1">Select Dependent Answer</option>
                     </select>
                 </div>
                 <input id="save_question" type="button" value="Save Question" onclick="submit_question(1)" />
@@ -326,12 +336,32 @@ function survey_add_dependency_ajax_callback() {
         wp_die( __('You do not have sufficient permissions to access this page.') );
     }
     
-    //Gather the list of answers for this 
-    $query = "SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE question=%d";
-    $answers = $wpdb->get_results($wpdb->prepare($query, intval($_POST['depquestion'])));
-    
-    foreach($answers as $answer) {        
-        echo "<option value='{$answer->id}'>{$answer->answer}</option>";
+    //Grab the question type to determine how to handle the options.
+    $query = "SELECT questiontype FROM {$wpdb->prefix}survey_questions WHERE id=%d";
+    $qtype = $wpdb->get_var($wpdb->prepare($query, intval($_POST['depquestion'])));
+   
+    switch ($qtype) {
+        //True/False questions don't have answers becuase it's always the same two.
+        case question::truefalse:
+            echo "<option value='1'>True</option>";
+            echo "<option value='0'>False</option>";
+        break;
+        
+        //Can't reasonably expect short/long answers to be a dependent question.
+        case question::shortanswer:
+        case question::longanswer:
+            echo "0";
+        break;
+        
+        //For all other question types that have answers.
+        default:
+            //Gather the list of answers for all questions that have them.
+            $query = "SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE question=%d";
+            $answers = $wpdb->get_results($wpdb->prepare($query, intval($_POST['depquestion'])));
+            
+            foreach($answers as $answer) {
+                echo "<option value='{$answer->id}'>{$answer->answer}</option>";
+            }
     }
     
     die();

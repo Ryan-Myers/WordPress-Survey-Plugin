@@ -107,7 +107,7 @@ if (current_user_can('manage_options')) { ?>
                     var depquestion = jQuery("#depquestion option:selected").val();
                     
                     //Show or hide the dependent answers based on this selection.
-                    if (depquestion != 0) {
+                    if (depquestion != "-1") {
                         jQuery('#depanswer').slideDown();
                         
                         var depdata = {
@@ -117,15 +117,23 @@ if (current_user_can('manage_options')) { ?>
                         };
                             
                         jQuery.post(ajaxurl, depdata, function(response) {
-                            jQuery('#depanswer').append(response);
+                            //If the response is 0 it's because that question type isn't supported.
+                            if (response != "0") {
+                                //Clear the list and then add recreate it.
+                                jQuery('#depanswer').
+                                    empty().
+                                    append('<option value="-1">Select Dependent Question</option>').
+                                    val('-1').
+                                    append(response);
+                            }
                         });
                     }
                     else {
                         jQuery('#depanswer').slideUp();
                         jQuery('#depanswer').
                             empty().
-                            append('<option value="0">Select Dependent Question</option>').
-                            val('0');
+                            append('<option value="-1">Select Dependent Question</option>').
+                            val('-1');
                     }
                 });
             });
