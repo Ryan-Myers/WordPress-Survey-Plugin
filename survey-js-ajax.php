@@ -26,8 +26,8 @@ $answers = $survey->get_answers($form);
 
 //Save each answer into the database.
 foreach ($answers as $question_id=>$answer) {
-    //Answers can be an array, so just seperate the answers by a comma and space if they are.
-    if (is_array($answer)) $answer = implode(', ', $answer);
+    //Answers can be an array, so just seperate the answers by a two semi-colons and space if they are.
+    if (is_array($answer)) $answer = implode(';; ', $answer);
     
     $query = "SELECT answer FROM {$wpdb->prefix}survey_user_answers WHERE user=%d AND question=%d";
     $prepared = $wpdb->prepare($query, $user_id, $question_id);
@@ -36,16 +36,12 @@ foreach ($answers as $question_id=>$answer) {
     if ($answered === NULL) {
         $wpdb->insert($wpdb->prefix."survey_user_answers", 
                       array('user'=>$user_id, 'question'=>$question_id, 'answer'=>$answer), array('%d', '%d', '%s'));
-        echo "inserted";
     }
     elseif($answered !== NULL && $answer != $answered) {
         $wpdb->update($wpdb->prefix."survey_user_answers", 
                       array('answer'=>$answer), array('user'=>$user_id, 'question'=>$question_id), 
                       array('%s'), array('%d', '%d', '%s'));
-        echo "updated";
     }
 }
-
-debug($answers);
 
 die();//Must die to properly return the results.

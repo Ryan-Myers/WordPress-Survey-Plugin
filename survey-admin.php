@@ -191,7 +191,7 @@ function survey_question_delete_ajax_callback() {
     //Gather the comma seperated list of questions form the survey table.
     $questions = $wpdb->get_var($wpdb->prepare("SELECT questions FROM {$wpdb->prefix}survey WHERE id=%d", $survey_id));
     
-    //Make the questions an array and remove the question id being deleted, then impode it again.
+    //Make the questions an array and remove the question id being deleted, then implode it again.
     $questions = implode(',', array_diff(explode(',', $questions), array($question_id)));
     
     //Put the new list of questions back into the survey.
@@ -404,6 +404,7 @@ function survey_submit_question_ajax_callback() {
         $qobject = new question(intval($question['survey_edit']));
         $qobject->edit_question($question['qtext']);
         $qobject->edit_type($question['qtype']);
+        $qobject->edit_dependency($question['depquestion'], $question['depanswer']);
     }
     else {
         $qobject = new question(false, $question['qtype'], $question['qtext'], 

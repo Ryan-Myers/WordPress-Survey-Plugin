@@ -128,8 +128,65 @@ class question {
         }
     }
     
+    public function edit_dependency($question_id, $answer_id) {
+        global $wpdb;
+        
+        $this->dependentquestion = $question_id;
+        $this->dependentanswer = $answer_id;
+        
+        $wpdb->update($wpdb->prefix.'survey_questions', 
+                    array('dependentquestion'=>$question_id, 'dependentanswer'=>$answer_id),
+                    array('id'=>$this->id), array('%d', '%d'), array('%d'));
+    }
+    
     public function get_question() {
-        $output = "<div class='question-container'>\n".
+        global $wpdb;
+        
+        //Logic to determine if the question should default to being hidden based on it being dependent on another.
+        if ($this->dependentquestion != "-1") {
+            $query = "SELECT questiontype FROM {$wpdb->prefix}survey_questions WHERE id=%d";
+            $qtype = $wpdb->get_var($wpdb->prepare($query, $this->dependentquestion));
+            
+            if ($qtype !== NULL && $qtype != self::shortanswer && $qtype != self::longanswer) {
+                $query = "SELECT answer FROM {$wpdb->prefix}survey_user_answers WHERE user=%d AND question=%d";
+                $answer = $wpdb->get_var($wpdb->prepare($query, get_survey_user_session(), $this->dependentquestion));
+                
+                if ($answer !== NULL && $qtype != self::truefalse) {
+                    //If the answer contains multiple answers, this will gather them together into an array.
+                    $answers = explode(';; ', $answer);
+                    
+                    foreach ($answers as $answer) {
+                        $query = "SELECT id FROM {$wpdb->prefix}survey_answers WHERE question=%d AND answer=%s";
+                        $answer_id = $wpdb->get_var($wpdb->prepare($query, $this->dependentquestion, $answer));
+                        
+                        if ($answer_id !== NULL) {
+                            if ($answer_id == $this->dependentanswer) {
+                                //Don't hide this question. It correctly matches the dependent answer.
+                                $style = "";
+                            }
+                        }
+                    }
+                }
+                elseif ($answer !== NULL && $qtype == self::truefalse) {
+                    if ($answer == "true" && $this->dependentanswer == "1") {
+                        $style = "";
+                    }
+                    elseif ($answer == "false" && $this->dependentanswer == "0") {
+                        $style = "";
+                    }
+                }
+            }
+        }
+        
+        //Hide the question by default if it's a dependent one. But not if it's already been set to nothing above.
+        if (!isset($style) && $this->dependentquestion != "-1") {
+            $style = "style='display:none'";
+        }
+        else {
+            $style = "";
+        }
+        
+        $output = "<div class='question-container' $style>\n".
                   "  <div class='question'>{$this->question}</div>\n".
                   "  <div class='answer-container'>\n";
         
@@ -139,14 +196,14 @@ class question {
                 $true = ($this->answer == "true") ? "checked='checked'" : "";
                 $false = ($this->answer == "false") ? "checked='checked'" : "";
                 
-                $output .= "    <div class='tf-answer'>\n".
+                $output .= "    <div class='tf-answer' $style>\n".
                            "      <input type='radio' name='tf-{$this->id}' value='true' $true /> True<br />\n".
                            "      <input type='radio' name='tf-{$this->id}' value='false' $false /> False\n".
                            "    </div>\n";
             break;
             
             case self::multichoice:
-                $output .= "    <div class='mc-answer'>\n";
+                $output .= "    <div class='mc-answer' $style>\n";
                 
                 foreach ($this->answers as $answer) {
                     //Select the answer that was previously chosen if it was.
@@ -160,7 +217,7 @@ class question {
             break;
             
             case self::dropdown:
-                $output .= "    <div class='dd-answer'>\n".
+                $output .= "    <div class='dd-answer' $style>\n".
                            "      <select name='dd-{$this->id}'>\n";
                 foreach ($this->answers as $answer) {
                     //Select the answer that was previously chosen if it was.
@@ -173,7 +230,7 @@ class question {
             break;
             
             case self::multiselect:
-                $output .= "    <div class='ms-answer'>\n";
+                $output .= "    <div class='ms-answer' $style>\n";
                 
                 foreach ($this->answers as $answer) {
                     //Select the answer that was previously chosen if it was. Checks every part of the array.
@@ -187,19 +244,19 @@ class question {
             break;
             
             case self::shortanswer:                
-                $output .= "    <div class='sa-answer'>\n".
+                $output .= "    <div class='sa-answer' $style>\n".
                            "        <input type='text' name='sa-{$this->id}' value='{$this->answer}' />\n".
                            "    </div>\n";
             break;
                         
             case self::longanswer:
-                $output .= "    <div class='la-answer'>\n".
+                $output .= "    <div class='la-answer' $style>\n".
                            "        <textarea cols='80' rows='10' name='la-{$this->id}'>{$this->answer}</textarea>\n".
                            "    </div>\n";
             break;
             
             case self::multichoiceother:
-                $output .= "    <div class='mco-answer'>\n";
+                $output .= "    <div class='mco-answer' $style>\n";
                 
                 $select_other = " ";
                 $selected = "";
@@ -228,7 +285,7 @@ class question {
             break;
             
             case self::multiselectother:
-                $output .= "    <div class='mso-answer'>\n";
+                $output .= "    <div class='mso-answer' $style>\n";
                 
                 $other_array = array();
                 foreach ($this->answers as $answer) {
@@ -367,7 +424,7 @@ class question {
         
         //Sets the answer to an array of the answers for multiple select questions
         if ($this->questiontype == self::multiselect || $this->questiontype == self::multiselectother) {
-            $answer = explode(', ', $answer);
+            $answer = explode(';; ', $answer);
         }
         
         return $answer;
