@@ -196,9 +196,11 @@ class question {
                 $true = ($this->answer == "true") ? "checked='checked'" : "";
                 $false = ($this->answer == "false") ? "checked='checked'" : "";
                 
-                $output .= "    <div class='tf-answer' $style>\n".
-                           "      <input type='radio' name='tf-{$this->id}' value='true' $true /> True<br />\n".
-                           "      <input type='radio' name='tf-{$this->id}' value='false' $false /> False\n".
+                $output .= "    <div class='tf-answer'>\n".
+                           "      <input type='radio' name='tf-{$this->id}' value='true' ".
+                                  "onclick='select_answer({$this->id}, 1)' $true /> True<br />\n".
+                           "      <input type='radio' name='tf-{$this->id}' value='false' ".
+                                  "onclick='select_answer({$this->id}, 0)' $false /> False\n".
                            "    </div>\n";
             break;
             
@@ -209,7 +211,8 @@ class question {
                     //Select the answer that was previously chosen if it was.
                     $selected = ($answer->answer == $this->answer) ? "checked='checked'" : "";
                     
-                    $output .= "      <input type='radio' name='mc-{$this->id}' value='{$answer->id}' $selected /> ".
+                    $output .= "      <input type='radio' name='mc-{$this->id}' value='{$answer->id}' ".
+                               "onclick='select_answer({$this->id}, {$answer->id})' $selected /> ".
                                "{$answer->answer}<br />\n";
                 }
                 
@@ -217,26 +220,30 @@ class question {
             break;
             
             case self::dropdown:
-                $output .= "    <div class='dd-answer' $style>\n".
-                           "      <select name='dd-{$this->id}'>\n";
-                foreach ($this->answers as $answer) {
+                $output .= "    <div class='dd-answer'>\n".
+                           "      <select name='dd-{$this->id}' ".
+                                  "onchange='select_answer({$this->id}, this.selectedindex)'>\n";
+                
+				foreach ($this->answers as $answer) {
                     //Select the answer that was previously chosen if it was.
                     $selected = ($answer->answer == $this->answer) ? "selected='selected'" : "";
                     
                     $output .= "        <option value='{$answer->id}' $selected>{$answer->answer}</option>\n";
                 }
-                $output .= "      </select>\n".
+                
+				$output .= "      </select>\n".
                            "    </div>\n";
             break;
             
             case self::multiselect:
-                $output .= "    <div class='ms-answer' $style>\n";
+                $output .= "    <div class='ms-answer'>\n";
                 
                 foreach ($this->answers as $answer) {
                     //Select the answer that was previously chosen if it was. Checks every part of the array.
                     $checked = (in_array($answer->answer, $this->answer)) ? "checked='checked'" : "";
                     
-                    $output .= "      <input type='checkbox' name='ms-{$this->id}[]' value='{$answer->id}' $checked/> ".
+                    $output .= "      <input type='checkbox' name='ms-{$this->id}[]' value='{$answer->id}' ".
+										"onclick='select_answer({$this->id}, {$answer->id})' $checked/> ".
                                "{$answer->answer}<br />\n";
                 }
                 
@@ -244,19 +251,19 @@ class question {
             break;
             
             case self::shortanswer:                
-                $output .= "    <div class='sa-answer' $style>\n".
+                $output .= "    <div class='sa-answer'>\n".
                            "        <input type='text' name='sa-{$this->id}' value='{$this->answer}' />\n".
                            "    </div>\n";
             break;
                         
             case self::longanswer:
-                $output .= "    <div class='la-answer' $style>\n".
+                $output .= "    <div class='la-answer'>\n".
                            "        <textarea cols='80' rows='10' name='la-{$this->id}'>{$this->answer}</textarea>\n".
                            "    </div>\n";
             break;
             
             case self::multichoiceother:
-                $output .= "    <div class='mco-answer' $style>\n";
+                $output .= "    <div class='mco-answer'>\n";
                 
                 $select_other = " ";
                 $selected = "";
@@ -274,7 +281,8 @@ class question {
                         $value = "value='{$this->answer}'";
                     }
                     
-                    $output .= "      <input type='radio' name='mco-{$this->id}' value='{$answer->id}' $selected /> ".
+                    $output .= "      <input type='radio' name='mco-{$this->id}' value='{$answer->id}' ".
+										"onclick='select_answer({$this->id}, {$answer->id})' $selected /> ".
                                "{$answer->answer}<br />\n";
                 }
                                 
@@ -285,7 +293,7 @@ class question {
             break;
             
             case self::multiselectother:
-                $output .= "    <div class='mso-answer' $style>\n";
+                $output .= "    <div class='mso-answer'>\n";
                 
                 $other_array = array();
                 foreach ($this->answers as $answer) {
@@ -298,7 +306,8 @@ class question {
                         $checked = "";
                     }
                     
-                    $output .= "   <input type='checkbox' name='mso-{$this->id}[]' value='{$answer->id}' $checked /> ".
+                    $output .= "   <input type='checkbox' name='mso-{$this->id}[]' value='{$answer->id}' ".
+									"onclick='select_answer({$this->id}, {$answer->id})' $checked /> ".
                                "{$answer->answer}<br />\n";
                 }
                 

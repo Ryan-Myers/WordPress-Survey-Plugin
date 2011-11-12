@@ -65,6 +65,21 @@ function survey_prev_page(page, lastpage) {
     }
 }
 
+function select_answer(question_id, answer_id) {
+	var data = {
+		question: question_id,
+		answer: answer_id
+	};
+	
+	//Posts to survey-js-question-ajax.php
+    jQuery.post('<?php echo plugins_url("survey-js-question-ajax.php", __FILE__); ?>', data, function(response){
+		var obj = jQuery.parseJSON(response);
+		jQuery.each(obj, function(index, value) {
+			jQuery(value).parent().parent().parent().slideDown();
+		});
+    });
+}
+
 function survey_submit(page) {
     survey_post_form_data(page);
 }
