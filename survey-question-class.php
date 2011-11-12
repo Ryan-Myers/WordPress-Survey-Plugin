@@ -224,14 +224,14 @@ class question {
                            "      <select name='dd-{$this->id}' ".
                                   "onchange='select_answer({$this->id}, this.selectedindex)'>\n";
                 
-				foreach ($this->answers as $answer) {
+                foreach ($this->answers as $answer) {
                     //Select the answer that was previously chosen if it was.
                     $selected = ($answer->answer == $this->answer) ? "selected='selected'" : "";
                     
                     $output .= "        <option value='{$answer->id}' $selected>{$answer->answer}</option>\n";
                 }
                 
-				$output .= "      </select>\n".
+                $output .= "      </select>\n".
                            "    </div>\n";
             break;
             
@@ -243,7 +243,7 @@ class question {
                     $checked = (in_array($answer->answer, $this->answer)) ? "checked='checked'" : "";
                     
                     $output .= "      <input type='checkbox' name='ms-{$this->id}[]' value='{$answer->id}' ".
-										"onclick='select_answer({$this->id}, {$answer->id})' $checked/> ".
+                                        "onclick='select_answer({$this->id}, {$answer->id})' $checked/> ".
                                "{$answer->answer}<br />\n";
                 }
                 
@@ -282,7 +282,7 @@ class question {
                     }
                     
                     $output .= "      <input type='radio' name='mco-{$this->id}' value='{$answer->id}' ".
-										"onclick='select_answer({$this->id}, {$answer->id})' $selected /> ".
+                                        "onclick='select_answer({$this->id}, {$answer->id})' $selected /> ".
                                "{$answer->answer}<br />\n";
                 }
                                 
@@ -307,7 +307,7 @@ class question {
                     }
                     
                     $output .= "   <input type='checkbox' name='mso-{$this->id}[]' value='{$answer->id}' ".
-									"onclick='select_answer({$this->id}, {$answer->id})' $checked /> ".
+                                    "onclick='select_answer({$this->id}, {$answer->id})' $checked /> ".
                                "{$answer->answer}<br />\n";
                 }
                 

@@ -17,44 +17,44 @@ $questions = $wpdb->get_results($wpdb->prepare($query, $question_id, $answer_id)
 $collection = array();
 
 foreach ($questions as $question) {
-	switch($question->questiontype) {
-		case question::truefalse:
-			$pre = "tf";
-		break;
-		
-		case question::multichoice:
-			$pre = "mc";
-		break;
-		
-		case question::dropdown:
-			$pre = "dd";
-		break;
-		
-		case question::multiselect:
-			$pre = "ms";
-		break;
-		
-		case question::shortanswer:
-			$pre = "sa";
-		break;
-		
-		case question::longanswer:
-			$pre = "la";
-		break;
-		
-		case question::multichoiceother:
-			$pre = "mco";
-		break;
-		
-		case question::multselectother:
-			$pre = "mso";
-		break;
-		
-		default:
-			$pre = "";
-	}
-	
-	$collection[] = "input[name='{$pre}-{$question->id}']";
+    switch($question->questiontype) {
+        case question::truefalse:
+            $pre = "tf";
+        break;
+        
+        case question::multichoice:
+            $pre = "mc";
+        break;
+        
+        case question::dropdown:
+            $pre = "dd";
+        break;
+        
+        case question::multiselect:
+            $pre = "ms";
+        break;
+        
+        case question::shortanswer:
+            $pre = "sa";
+        break;
+        
+        case question::longanswer:
+            $pre = "la";
+        break;
+        
+        case question::multichoiceother:
+            $pre = "mco";
+        break;
+        
+        case question::multselectother:
+            $pre = "mso";
+        break;
+        
+        default:
+            $pre = "";
+    }
+    
+    $collection[] = "input[name='{$pre}-{$question->id}']";
 }
 
 echo json_encode($collection);
