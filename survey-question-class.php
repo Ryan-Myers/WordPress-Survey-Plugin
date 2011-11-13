@@ -18,7 +18,7 @@ class question {
     public $answers = array();
     public $answer = NULL;
     
-    public function __construct($id, $type = 0, $questiontext = "", $depquestion = 0, $depanswer = 0, $ordernum = 0) {
+    public function __construct($id, $type = 0, $questiontext = "", $depquestion = -1, $depanswer = -1, $ordernum = 1) {
         global $wpdb;
         
         //Find a question based the passed id.
@@ -84,7 +84,7 @@ class question {
                 $ordernum = $wpdb->get_var($wpdb->prepare($query, $this->id));
                 
                 //If there isn't any order numbers existing yet, this is the first so default it to 1.
-                if ($ordernum === NULL) $ordernum = 1;
+                if ($ordernum === NULL || $ordernum < 1) $ordernum = 1;
             }
             
             $insert = $wpdb->insert($wpdb->prefix.'survey_answers', 
@@ -208,7 +208,7 @@ class question {
             break;
             
             case self::multichoice:
-                $output .= "    <div class='mc-answer' $style>\n";
+                $output .= "    <div class='mc-answer'>\n";
                 
                 foreach ($this->answers as $answer) {
                     //Select the answer that was previously chosen if it was.

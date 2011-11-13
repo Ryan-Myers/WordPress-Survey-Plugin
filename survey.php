@@ -42,7 +42,7 @@ function survey_activation() {
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
     `name` VARCHAR( 200 ) NULL DEFAULT NULL ,
     `questions` TEXT NULL DEFAULT NULL ,
-    `questionsperpage` INT NOT NULL DEFAULT  '10')");
+    `questionsperpage` INT NOT NULL DEFAULT  '3')");
     
     $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_questions` (
     `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
@@ -88,9 +88,9 @@ function survey_deactivation() {
     global $wpdb;
     
     //Remove the created tables for this plugin
-    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
-    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
-    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_user_answers");
     

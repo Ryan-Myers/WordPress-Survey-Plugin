@@ -8,7 +8,7 @@ class survey {
     public $pages;
     public $answers = array();
     
-    public function __construct($id, $name = "", $questionsperpage = 10) {
+    public function __construct($id, $name = "", $questionsperpage = 3) {
         global $wpdb;
         
         //Find a survey based the passed id.
@@ -58,7 +58,7 @@ class survey {
         }
     }
     
-    public function add_question($type, $questiontext = "", $depquestion = 0, $depanswer = 0, $ordernum = 0) {
+    public function add_question($type, $questiontext = "", $depquestion = -1, $depanswer = -1, $ordernum = 1) {
         //If you want to add a question by id, then use add_qobject(new question($id))
         $qobject = $this->add_qobject(new question(FALSE, $type, $questiontext, $depquestion, $depanswer, $ordernum));
         
@@ -128,8 +128,8 @@ class survey {
         }
         
         //If the question end is greater than the number of questions, then it should only go to the last question.
-        if ($question_end > count($this->qobjects)) {
-            $question_end = count($this->qobjects);
+        if ($question_end > count($this->qobjects)-1) {
+            $question_end = count($this->qobjects)-1;
         }
         
         $output = "<form id='survey-form-page-$page' style='display:none'>\n";

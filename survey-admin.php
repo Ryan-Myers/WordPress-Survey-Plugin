@@ -443,7 +443,6 @@ function survey_submit_question_ajax_callback() {
             break;
         default:
             foreach ($question['answers'] as $answer_id=>$answer) {
-                debug($answer);
                 //If the answer id is in the array, then it must be edited, otherwise it's a new answer.
                 if (in_array($answer_id, $edit)) {
                     $qobject->edit_answer($answer_id, $answer);
