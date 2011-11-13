@@ -223,17 +223,23 @@ function survey_add_question_ajax_callback() {
     
     //If this is being edited, the question id will be posted.
     if (isset($_POST['question'])) {
-        $query = "SELECT question,questiontype FROM {$wpdb->prefix}survey_questions WHERE id=%d";
+        $query = "SELECT question,questiontype,dependentquestion,dependentanswer 
+                  FROM {$wpdb->prefix}survey_questions WHERE id=%d";
         $row = $wpdb->get_row($wpdb->prepare($query, intval($_POST['question'])));
         $qt = intval($row->questiontype);
+        $dq = intval($row->dependentquestion);
+        $da = intval($row->dependentanswer);
         
         $query = "SELECT id,answer FROM {$wpdb->prefix}survey_answers WHERE question=%d AND hidden=0 ORDER BY ordernum";
         $answers = $wpdb->get_results($wpdb->prepare($query, intval($_POST['question'])), ARRAY_N);
     }
     else {
-        //Default these values to noting to allow things to progress later one.
+        //Default these values to noting to allow things to progress later on.
         $row->question = '';
         $answers[0][0] = "";
+        $qt = NULL;
+        $dq = -1;
+        $da = -1;
     }
     ?>
     <form id="question-form">
@@ -303,13 +309,20 @@ function survey_add_question_ajax_callback() {
                                 if ($qobject->questiontype != question::shortanswer && 
                                     $qobject->questiontype != question::longanswer) {
                                     
-                                    echo "<option value='{$question}'>{$qobject->question}</option>";
+                                    $selected = ($question == $row->dependentquestion) ? "selected='selected'" : "";
+                                    
+                                    echo "<option value='{$question}' $selected>{$qobject->question}</option>";
                                 }
                             }
                         ?>
                     </select><br />
-                    <select id="depanswer" name="depanswer" style="display:none">
+                    <select id="depanswer" name="depanswer" <?php if ($dq == -1) echo 'style="display:none"'; ?>>
                         <option value="-1">Select Dependent Answer</option>
+                        <?php
+                            if ($dq != -1) {
+                                survey_get_dependent_answers($dq, $da);
+                            }
+                        ?>
                     </select>
                 </div>
                 <input id="save_question" type="button" value="Save Question" onclick="submit_question(1)" />
@@ -327,24 +340,20 @@ function survey_add_question_ajax_callback() {
     die();// this is required to return a proper result
 }
 
-function survey_add_dependency_ajax_callback() {
+function survey_get_dependent_answers($depquestion, $depanswer = -1) {
     global $wpdb;
-    check_ajax_referer('survey_add_dependency_nonce', 'security');
-    
-    //Make sure they're logged in with the appropriate permissions.
-    if (!current_user_can('manage_options'))  {
-        wp_die( __('You do not have sufficient permissions to access this page.') );
-    }
     
     //Grab the question type to determine how to handle the options.
     $query = "SELECT questiontype FROM {$wpdb->prefix}survey_questions WHERE id=%d";
-    $qtype = $wpdb->get_var($wpdb->prepare($query, intval($_POST['depquestion'])));
+    $qtype = $wpdb->get_var($wpdb->prepare($query, $depquestion));
    
     switch ($qtype) {
         //True/False questions don't have answers becuase it's always the same two.
         case question::truefalse:
-            echo "<option value='1'>True</option>";
-            echo "<option value='0'>False</option>";
+            $selected1 = ($depanswer === 1) ? "selected='selected'" : ""; 
+            $selected0 = ($depanswer === 0) ? "selected='selected'" : ""; 
+            echo "<option value='1' $selected1>True</option>";
+            echo "<option value='0' $selected0>False</option>";
         break;
         
         //Can't reasonably expect short/long answers to be a dependent question.
@@ -357,12 +366,24 @@ function survey_add_dependency_ajax_callback() {
         default:
             //Gather the list of answers for all questions that have them.
             $query = "SELECT id, answer FROM {$wpdb->prefix}survey_answers WHERE question=%d";
-            $answers = $wpdb->get_results($wpdb->prepare($query, intval($_POST['depquestion'])));
+            $answers = $wpdb->get_results($wpdb->prepare($query, $depquestion));
             
             foreach($answers as $answer) {
-                echo "<option value='{$answer->id}'>{$answer->answer}</option>";
+                $selected = ($depanswer == $answer->id) ? "selected='selected'" : "";
+                echo "<option value='{$answer->id}' $selected>{$answer->answer}</option>";
             }
     }
+}
+
+function survey_add_dependency_ajax_callback() {
+    check_ajax_referer('survey_add_dependency_nonce', 'security');
+    
+    //Make sure they're logged in with the appropriate permissions.
+    if (!current_user_can('manage_options'))  {
+        wp_die( __('You do not have sufficient permissions to access this page.') );
+    }
+    
+    survey_get_dependent_answers(intval($_POST['depquestion']));
     
     die();
 }
