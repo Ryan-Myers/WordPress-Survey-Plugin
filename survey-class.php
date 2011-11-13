@@ -129,10 +129,12 @@ class survey {
         
         //If the question end is greater than the number of questions, then it should only go to the last question.
         if ($question_end > count($this->qobjects)-1) {
-            $question_end = count($this->qobjects)-1;
+            $question_end = count($this->qobjects);
         }
         
         $output = "<form id='survey-form-page-$page' style='display:none'>\n";
+        
+        $output .= "<div>Question Start: $question_start ==== Question End: $question_end</div>";
         
         for ($i = $question_start; $i <= $question_end; $i++) {
             $output .= $this->qobjects[$i]->get_question();

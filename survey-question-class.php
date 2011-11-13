@@ -283,6 +283,9 @@ class question {
                         $select_other = "checked='checked'";
                         $value = "value='{$this->answer}'";
                     }
+                    else {
+                        $selected= "";
+                    }
                     
                     $output .= "      <input type='radio' name='mco-{$this->id}' value='{$answer->id}' ".
                                         "onclick='select_answer({$this->id}, {$answer->id})' $selected /> ".

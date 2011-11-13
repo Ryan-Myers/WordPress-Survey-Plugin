@@ -34,6 +34,8 @@ function survey_next_page(page, lastpage) {
     var nextpage;
     nextpage = page+1;
     
+    survey_post_form_data(page);
+    
     //As long as this isn't the last page, hide the current page and show the next page.
     if (page < lastpage) { 
         jQuery('#survey-form-page-'+page).hide();
@@ -45,13 +47,13 @@ function survey_next_page(page, lastpage) {
         jQuery('#survey-next-page-'+nextpage).val('Submit Survey');
         jQuery('#survey-next-page-'+nextpage).attr('onclick', 'survey_finish('+lastpage+')');
     }
-    
-    survey_post_form_data(page);
 }
 
 function survey_prev_page(page, lastpage) {
     var prevpage;
     prevpage = page-1;
+    
+    survey_post_form_data(page);
     
     //As long as this isn't the first page, hide the current page and show the previous page.
     if (page > 1) {
@@ -60,8 +62,8 @@ function survey_prev_page(page, lastpage) {
     }
     
     if (page == lastpage) {
-        jQuery('#survey-next-page-'+nextpage).val('Next Page');
-        jQuery('#survey-next-page-'+nextpage).attr('onclick', 'survey_submit('+lastpage+')');
+        jQuery('#survey-next-page-'+page).val('Next Page');
+        jQuery('#survey-next-page-'+page).attr('onclick', 'survey_submit('+lastpage+')');
     }
 }
 
