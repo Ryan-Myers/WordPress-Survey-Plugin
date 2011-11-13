@@ -162,7 +162,7 @@ if (current_user_can('manage_options')) { ?>
         jQuery.post(ajaxurl, data, function(response) {
             jQuery('#survey-admin-page').html(response);
             //Return the question list after saving the question.
-            select_survey(survey_id);
+            //select_survey(survey_id);
         });
     }
     

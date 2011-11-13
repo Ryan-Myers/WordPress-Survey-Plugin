@@ -25,7 +25,7 @@ class survey {
                 //Transform the comma seperated list of questions id's into an array, 
                 $questions = explode(',', $this->questions);
                 //Double check that it's not empty. Exploding nothing will create a single entry with an empty string.
-                $questions = (!empty($questions)) ? $questions : array();
+                $questions = (!empty($questions[0])) ? $questions : array();
                 
                 //Get the number of pages by dividing the questions by questions per page and rounding up.
                 $this->pages = ceil(count($questions) / $this->questionsperpage);

@@ -27,7 +27,7 @@ class question {
                      "FROM {$wpdb->prefix}survey_questions WHERE id = %d";
             $row = $wpdb->get_row($wpdb->prepare($query, $id));
             
-            if ($row !== FALSE) {
+            if ($row !== FALSE && $row !== NULL) {
                 $this->id = $row->id;
                 $this->question = $row->question;
                 $this->questiontype = $row->questiontype;
@@ -41,6 +41,9 @@ class question {
                 $this->answers = $wpdb->get_results($wpdb->prepare($query, $this->id), OBJECT_K);
                 
                 $this->answer = $this->set_answer();
+            }
+            else {
+                throw new Exception("Could not find question with passed ID of $id");
             }
         }
         //If false was passed for id, instead build a new question

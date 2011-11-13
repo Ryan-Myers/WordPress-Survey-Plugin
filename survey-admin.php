@@ -303,15 +303,18 @@ function survey_add_question_ajax_callback() {
                             foreach($questions as $question) {
                                 $query="SELECT question,questiontype FROM {$wpdb->prefix}survey_questions WHERE id=%d";
                                 $qarray = $wpdb->get_results($wpdb->prepare($query, $question));
-                                $qobject = $qarray[0];
                                 
-                                //Don't display question types that can't be dependent.
-                                if ($qobject->questiontype != question::shortanswer && 
-                                    $qobject->questiontype != question::longanswer) {
+                                if (!empty($qarray)) {
+                                    $qobject = $qarray[0];
                                     
-                                    $selected = ($question == $row->dependentquestion) ? "selected='selected'" : "";
-                                    
-                                    echo "<option value='{$question}' $selected>{$qobject->question}</option>";
+                                    //Don't display question types that can't be dependent.
+                                    if ($qobject->questiontype != question::shortanswer && 
+                                        $qobject->questiontype != question::longanswer) {
+                                        
+                                        $selected = ($question == $row->dependentquestion) ? "selected='selected'" : "";
+                                        
+                                        echo "<option value='{$question}' $selected>{$qobject->question}</option>";
+                                    }
                                 }
                             }
                         ?>
@@ -428,7 +431,7 @@ function survey_submit_question_ajax_callback() {
         $qobject->edit_dependency($question['depquestion'], $question['depanswer']);
     }
     else {
-        $qobject = new question(false, $question['qtype'], $question['qtext'], 
+        $qobject = new question(FALSE, $question['qtype'], $question['qtext'], 
                                        $question['depquestion'], $question['depanswer']);
     }
     
@@ -440,6 +443,7 @@ function survey_submit_question_ajax_callback() {
             break;
         default:
             foreach ($question['answers'] as $answer_id=>$answer) {
+                debug($answer);
                 //If the answer id is in the array, then it must be edited, otherwise it's a new answer.
                 if (in_array($answer_id, $edit)) {
                     $qobject->edit_answer($answer_id, $answer);
@@ -450,9 +454,10 @@ function survey_submit_question_ajax_callback() {
             }
     }
     
+    
     //Don't add a new question to the survey list if it's being edited.
     if (!isset($question['survey_edit'])) {
-        $survey = new survey($_POST['survey']);
+        $survey = new survey(intval($_POST['survey']));
         $survey->add_qobject($qobject);
     }
     
