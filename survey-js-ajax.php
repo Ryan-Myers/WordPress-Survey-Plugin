@@ -20,13 +20,9 @@ foreach($_POST['form'] as $posted) {
     }
 }
 
-debug($form);
-
 $survey = new survey($form['survey-id']);
 
 $answers = $survey->get_answers($form);
-
-debug($answers);
 
 //Save each answer into the database.
 foreach ($answers as $question_id=>$answer) {
