@@ -71,11 +71,25 @@ function select_answer(question_id, answer_id) {
         answer: answer_id
     };
     
-    //Posts to survey-js-question-ajax.php
+    //Show the question that depends on this question and answer.
     jQuery.post('<?php echo plugins_url("survey-js-question-ajax.php", __FILE__); ?>', data, function(response){
         var obj = jQuery.parseJSON(response);
         jQuery.each(obj, function(index, value) {
             jQuery(value).parent().parent().parent().slideDown();
+        });
+    });
+    
+    var data = {
+        question: question_id,
+        answer: answer_id,
+        hide: '1'
+    };
+    
+    //Hide the dependent questions that haven't been chosen.
+    jQuery.post('<?php echo plugins_url("survey-js-question-ajax.php", __FILE__); ?>', data, function(response){
+        var obj = jQuery.parseJSON(response);
+        jQuery.each(obj, function(index, value) {
+            jQuery(value).parent().parent().parent().slideUp();
         });
     });
 }

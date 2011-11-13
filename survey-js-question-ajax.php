@@ -11,7 +11,14 @@ if ($user_id === FALSE) {
 $question_id = intval($_POST['question']);
 $answer_id = intval($_POST['answer']);
 
+//If hide is set then select all questions with this as a dependent question, but a different answer.
+if (isset($_POST['hide'])) {
+$query="SELECT id,questiontype FROM {$wpdb->prefix}survey_questions WHERE dependentquestion=%d AND dependentanswer!=%d";
+}
+else {
 $query="SELECT id,questiontype FROM {$wpdb->prefix}survey_questions WHERE dependentquestion=%d AND dependentanswer=%d";
+}
+
 $questions = $wpdb->get_results($wpdb->prepare($query, $question_id, $answer_id));
 
 $collection = array();
