@@ -180,6 +180,9 @@ if (current_user_can('manage_options')) { ?>
         var name = jQuery('#survey-'+survey_id+' :nth-child(2)');
         name.html(create_textbox('name-'+survey_id,  name.text()));
         
+        var questions = jQuery('#survey-'+survey_id+' :nth-child(4)');
+        questions.html(create_textbox('questions-'+survey_id, questions.text()));
+        
         var edit = jQuery('#survey-'+survey_id+' :nth-child(5)').children(':first-child');
         edit.attr('value', 'Save');
         edit.attr('onclick', 'save_survey(this, '+survey_id+')');
@@ -209,18 +212,23 @@ if (current_user_can('manage_options')) { ?>
         edit.attr('onclick', 'edit_survey('+survey_id+')');
         
         var name = jQuery('#survey-'+survey_id+' :nth-child(2)');
-        var value = name.children(':first-child').val();
-        name.html(value);
+        var name_value = name.children(':first-child').val();
+        name.html(name_value);
+        
+        var questions = jQuery('#survey-'+survey_id+' :nth-child(4)');
+        var questions_value = questions.children(':first-child').val();
+        questions.html(questions_value);
         
         var data = {
             action: 'survey_edit_ajax',
             security: '<?php echo wp_create_nonce("survey_edit_nonce"); ?>',
             survey: survey_id,
-            val: value
+            name: name_value,
+            questions: questions_value
         };
         
         // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
-        jQuery.post(ajaxurl, data);
+        jQuery.post(ajaxurl, data, function(response){console.log(response);});
     }
     
     function edit_question(survey_id, question_id) {

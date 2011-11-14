@@ -31,7 +31,7 @@ function survey_show_admin_page() {
                 "  <td>{$survey->name}</td>\n".
                 "  <td>{$questions_count}</td>\n".
                 "  <td>{$survey->questionsperpage}</td>\n".
-                "  <td><input type='button' value='Edit Name' onclick='edit_survey({$survey->id})' /></td>\n".
+                "  <td><input type='button' value='Edit' onclick='edit_survey({$survey->id})' /></td>\n".
                 "  <td><input type='button' value='Delete Survey' onclick='delete_survey({$survey->id})' /></td>\n".
                 "</tr>\n";
     }
@@ -89,9 +89,10 @@ function survey_edit_ajax_callback() {
     }
     
     $wpdb->update($wpdb->prefix.'survey', 
-                  array('name'=>stripslashes($_POST['val'])), //Strip the slashes that the AJAX call seems to add.
+                  array('name'=>stripslashes($_POST['name']),//Strip the slashes that the AJAX call seems to add.
+                        'questionsperpage'=>stripslashes($_POST['questions'])),//Strip the slashes again.
                   array('id'=>intval($_POST['survey'])), 
-                  array('%s'), array('%d'));
+                  array('%s', '%d'), array('%d'));
     
     die();
 }
