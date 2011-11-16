@@ -74,6 +74,7 @@ function survey_activation() {
     `user` INT NOT NULL ,
     `question` INT NOT NULL ,
     `answer` TEXT,
+    `lastedited` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (  `user` ,  `question` ))");
     
     //Add the survey version to the wordpress options table. 
@@ -88,10 +89,10 @@ function survey_deactivation() {
     global $wpdb;
     
     //Remove the created tables for this plugin
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
-    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
+    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
+    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
+    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
+    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_user_answers");
     
     //Remove the survey version from the wordpress options table.
