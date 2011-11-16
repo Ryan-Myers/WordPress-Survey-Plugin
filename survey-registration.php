@@ -104,7 +104,9 @@ function is_physician($user_id = 0) {
     global $wpdb;
     
     //If the user id wasn't passed, grab it.
-    $user_id = ($user_id == 0) ? get_survey_user_session() : $user_id;
+    if ($user_id == 0 && isset($_COOKIE['survey_p']) && get_survey_user_session() !== FALSE) {
+        $user_id = intval($_COOKIE['survey_p']);
+    }
     
     $prepared = $wpdb->prepare("SELECT is_physician FROM {$wpdb->prefix}survey_users WHERE id=%d", $user_id);
     $physician = $wpdb->get_var($prepared);

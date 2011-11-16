@@ -51,6 +51,7 @@ function survey_activation() {
     `ordernum` SMALLINT NOT NULL ,
     `dependentquestion` INT NOT NULL DEFAULT  '-1' ,
     `dependentanswer` INT NOT NULL DEFAULT  '-1' ,
+    `physician` BOOLEAN NOT NULL DEFAULT  '0' ,
     `hidden` BOOLEAN NOT NULL DEFAULT  '0')");
     
     $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_answers` (

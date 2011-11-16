@@ -14,16 +14,17 @@ class question {
     public $ordernum;
     public $dependentquestion;
     public $dependentanswer;
+    public $physician;
     public $hidden = 0;
     public $answers = array();
     public $answer = NULL;
     
-    public function __construct($id, $type = 0, $questiontext = "", $depquestion = -1, $depanswer = -1, $ordernum = 1) {
+    public function __construct($id,$type=0,$questiontext="",$depquestion=-1,$depanswer=-1,$physician=0,$ordernum=1) {
         global $wpdb;
         
         //Find a question based the passed id.
         if ($id !== FALSE) {
-            $query = "SELECT id, question, questiontype, ordernum, dependentquestion, dependentanswer, hidden ".
+            $query = "SELECT id,question,questiontype,ordernum,dependentquestion,dependentanswer,physician,hidden ".
                      "FROM {$wpdb->prefix}survey_questions WHERE id = %d";
             $row = $wpdb->get_row($wpdb->prepare($query, $id));
             
@@ -34,6 +35,7 @@ class question {
                 $this->ordernum = $row->ordernum;
                 $this->dependentquestion = $row->dependentquestion;
                 $this->dependentanswer = $row->dependentanswer;
+                $this->physician = $row->physician;
                 $this->hidden = $row->hidden;
                 
                 $query = "SELECT id, answer, ordernum ".
@@ -50,8 +52,9 @@ class question {
         else {
             $insert = $wpdb->insert($wpdb->prefix.'survey_questions', 
                                     array('question'=>$questiontext, 'questiontype'=>$type, 'ordernum'=>$ordernum,
-                                          'dependentquestion'=>$depquestion, 'dependentanswer'=>$depanswer), 
-                                    array('%s', '%d', '%d', '%d', '%d'));
+                                          'dependentquestion'=>$depquestion, 'dependentanswer'=>$depanswer, 
+                                          'physician'=>physician),
+                                    array('%s', '%d', '%d', '%d', '%d', '%d'));
             
             //Set the id of this survey to the id of the last inserted row.
             $this->id = $insert ? $wpdb->insert_id : FALSE;
@@ -61,6 +64,7 @@ class question {
                 $this->questiontype = $type;
                 $this->dependentquestion = $depquestion;
                 $this->dependentanswer = $depanswer;
+                $this->physician = $physician;
                 $this->ordernum = $ordernum;
             }
             else {
@@ -140,6 +144,16 @@ class question {
         $wpdb->update($wpdb->prefix.'survey_questions', 
                     array('dependentquestion'=>$question_id, 'dependentanswer'=>$answer_id),
                     array('id'=>$this->id), array('%d', '%d'), array('%d'));
+    }
+    
+    public function edit_physician($physician) {
+        global $wpdb;
+        
+        $this->physician = $physician;
+        
+        $wpdb->update($wpdb->prefix.'survey_questions', 
+                    array('physician'=>$physician), array('id'=>$this->id), 
+                    array('%d'), array('%d'));
     }
     
     public function get_question() {
