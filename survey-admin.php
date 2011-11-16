@@ -201,6 +201,13 @@ function survey_question_delete_ajax_callback() {
                 array('id'=>$survey_id), 
                 array('%s'), array('%d'));
     
+    //Grab the ordernum of this question.
+    $query = "SELECT ordernum FROM {$wpdb->prefix}survey_questions WHERE id=%d";
+    $ordernum = $wpdb->get_var($wpdb->prepare($query, $question_id));
+    
+    //Use the current ordernum to move everything above this question down in order by one.
+    $wpdb->query("UPDATE `{$wpdb->prefix}survey_questions` SET `ordernum` = `ordernum`-1 WHERE `ordernum` > $ordernum");
+    
     //Delete all of the answers to this question.
     $wpdb->query($wpdb->prepare("DELETE FROM {$wpdb->prefix}survey_answers WHERE question=%d", $question_id));
     
