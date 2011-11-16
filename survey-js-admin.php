@@ -58,6 +58,25 @@ if (current_user_can('manage_options')) { ?>
             jQuery('#survey-table').slideUp();
             jQuery('#survey-admin-page').html(response);
             jQuery('#survey-questions-table').slideDown();
+            
+            // Initialise the table specifying an onDrop function that will allow for drag and drop reordering.
+            jQuery("#survey-questions-table").tableDnD({
+                onDrop: function(table, row) {
+                    var post_order = {
+                        action: 'survey_reorder_ajax',
+                        security: '<?php echo wp_create_nonce("survey_reorder_nonce"); ?>',
+                        survey: survey_id,
+                        order: jQuery.tableDnD.serialize()
+                    };
+                    
+                    jQuery.post(ajaxurl, post_order, function(response) {
+                        console.log(response);
+                    });
+                },
+                onDragStart: function(table, row) {
+                    console.log("Started dragging row "+row.id);
+                }
+            });
         });
     }
         

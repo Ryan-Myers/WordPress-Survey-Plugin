@@ -33,7 +33,7 @@ function set_survey_user_session() {
     }
     elseif (isset($_POST['survey_patient'])) {
         //For physicians, use the user_id from the selected patient to log in as.
-        $user_id = (survey_login_user() !== FALSE) ? intval($_POST['survey_patient']) : FALSE;
+        $user_id = (get_survey_user_session() !== FALSE) ? intval($_POST['survey_patient']) : FALSE;
     }
     
     if ($user_id !== FALSE) {
@@ -100,6 +100,9 @@ function get_survey_user_session() {
     return FALSE;
 }
 
+/**
+    Checks if the user is logged in as a physician. If passed a user_id, it will check if that user is a physician.
+**/
 function is_physician($user_id = 0) {
     global $wpdb;
     

@@ -29,6 +29,7 @@ add_action('wp_ajax_survey_edit_ajax', 'survey_edit_ajax_callback');
 add_action('wp_ajax_survey_delete_ajax', 'survey_delete_ajax_callback');
 add_action('wp_ajax_survey_question_delete_ajax', 'survey_question_delete_ajax_callback');
 add_action('wp_ajax_survey_add_dependency_ajax', 'survey_add_dependency_ajax_callback');
+add_action('wp_ajax_survey_reorder_ajax', 'survey_reorder_ajax_callback');
 
 /**
     Upon Activating the plugin this gets called. It will set the tables and options.
@@ -127,8 +128,12 @@ function survey_add_admin_link() {
     $plugin_page = add_options_page('Survey Configuration', 'Survey Configuration', 'manage_options', 
                                     'SurveyOptionsPage', 'survey_show_admin_page');
     
-    //Add the javascript
+    //Add the admin javascript
     add_action( "admin_head-{$plugin_page}", 'survey_admin_js');
+    
+    //Add the jQuery table reordering script
+    wp_register_script("survey_tablednd_js", plugins_url('jquery.tablednd_0_5.js', __FILE__));
+    wp_enqueue_script("survey_tablednd_js");
 }
 
 /**

@@ -481,3 +481,48 @@ function survey_submit_question_ajax_callback() {
     
     die();// this is required to return a proper result
 }
+
+/**
+    This gets called when doing the drag and drop reordering of questions.
+**/
+function survey_reorder_ajax_callback() {
+    global $wpdb;
+    
+    check_ajax_referer('survey_reorder_nonce', 'security');
+    
+    //Make sure they're logged in with the appropriate permissions.
+    if (!current_user_can('manage_options'))  {
+        wp_die( __('You do not have sufficient permissions to access this page.') );
+    }
+    
+    //Remove all of the ampersands from the list.
+    $posted_order = str_replace('&', '', $_POST['order']);
+    
+    //Explode the order of the questions into an array
+    $order = explode('survey-questions-table[]=', $posted_order);
+    
+    //Clean up the array by removing all of the blank elements.
+    foreach ($order as $key=>$value) {
+        if (empty($value)) unset($order[$key]);
+    }
+    
+    //Re-index the array starting from 0.
+    $ordered = array_values($order);
+    
+    //Update the order for each question.
+    //TODO: Make this significiantly more optimized.
+    foreach ($ordered as $ordernum=>$question_id) {
+        $wpdb->update($wpdb->prefix.'survey_questions', array('ordernum'=>$ordernum+1), 
+                      array('id'=>$question_id), array('%d'), array('%d'));
+    }
+    
+    //Seperate the ordered ID's with a comma and use them to insert into the survey.
+    $questions = implode(',', $ordered);
+    
+    $wpdb->update($wpdb->prefix.'survey', array('questions'=>$questions), 
+                array('id'=>intval($_POST['survey'])), array('%s'), array('%d'));
+    
+    echo "Done!";
+    
+    die();
+}
