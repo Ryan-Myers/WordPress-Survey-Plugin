@@ -31,6 +31,14 @@ function survey_page($atts, $content=null) {
                 <select name='survey_patient'>".get_patients($user_id)."</select>
                 <input type='submit' value='View Patient Survey' />
               </form>";
+              
+        echo "<div>Generate a PDF</div>
+              <div>
+                <input type='button' value='Appendix H' onclick='appendix_h($user_id)' />
+                <input type='button' value='Appendix I' onclick='appendix_i($user_id)' />
+                <input type='button' value='Appendix K' onclick='appendix_k($user_id)' />
+                <input type='button' value='Appendix L' onclick='appendix_l($user_id)' />
+              </div>";
     }
     elseif ($user_id !== FALSE) {
         $survey = new survey($atts['id']);

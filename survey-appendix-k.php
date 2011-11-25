@@ -10,7 +10,7 @@ $pdf->SetCreator('Survey Plugin');
 $pdf->SetAuthor('Reterborough FHT');
 $pdf->SetTitle('Youth Sports Concussion Program Return to Play Clearance Form');
 $pdf->SetSubject('Youth Sports');
-$pdf->SetKeywords('Appendix G');
+$pdf->SetKeywords('Appendix K');
 
 // remove default header/footer
 $pdf->setPrintHeader(false);
