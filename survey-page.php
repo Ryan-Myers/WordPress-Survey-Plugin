@@ -28,16 +28,16 @@ function survey_page($atts, $content=null) {
         echo "<div>Select a patient from the list to view their survey</div>";
         
         echo "<form action='{$_SERVER['REQUEST_URI']}' method='post'>
-                <select name='survey_patient'>".get_patients($user_id)."</select>
+                <select id='survey_patient' name='survey_patient'>".get_patients($user_id)."</select>
                 <input type='submit' value='View Patient Survey' />
               </form>";
               
         echo "<div>Generate a PDF</div>
               <div>
-                <input type='button' value='Appendix H' onclick='appendix_h($user_id)' />
-                <input type='button' value='Appendix I' onclick='appendix_i($user_id)' />
-                <input type='button' value='Appendix K' onclick='appendix_k($user_id)' />
-                <input type='button' value='Appendix L' onclick='appendix_l($user_id)' />
+                <input type='button' value='Appendix H' onclick='survey_generate_pdf(\"h\")' />
+                <input type='button' value='Appendix I' onclick='survey_generate_pdf(\"i\")' />
+                <input type='button' value='Appendix K' onclick='survey_generate_pdf(\"k\")' />
+                <input type='button' value='Appendix L' onclick='survey_generate_pdf(\"l\")' />
               </div>";
     }
     elseif ($user_id !== FALSE) {

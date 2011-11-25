@@ -30,7 +30,8 @@ $pdf->writeHTML($html);
 // ---------------------------------------------------------
 //Close and output PDF document
 //$pdf->Output('Return-To-Play.pdf', 'D'); // Force Download
-$pdf->Output('Return-To-Play.pdf', 'I');
+//$pdf->Output('Return-To-Play.pdf', 'I'); //Output to screen.
+$pdf->Output(sys_get_temp_dir().'/Return-To-Play.pdf', 'F'); //Save file
 //============================================================+
 // END OF FILE                                                
 //============================================================+
