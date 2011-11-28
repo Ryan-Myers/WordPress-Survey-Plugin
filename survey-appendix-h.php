@@ -8,9 +8,9 @@ $pdf = new TCPDF();
 
 $pdf->SetCreator('Survey Plugin');
 $pdf->SetAuthor('Reterborough FHT');
-$pdf->SetTitle('Youth Sports Concussion Program Return to Play Clearance Form');
+$pdf->SetTitle('Youth Sports Concussion Program Post-Injury General Information and Exertion Form');
 $pdf->SetSubject('Youth Sports');
-$pdf->SetKeywords('Appendix K');
+$pdf->SetKeywords('Appendix H');
 
 // remove default header/footer
 $pdf->setPrintHeader(false);
@@ -31,7 +31,7 @@ $pdf->writeHTML($html);
 //Close and output PDF document
 //$pdf->Output('Return-To-Play.pdf', 'D'); // Force Download
 //$pdf->Output('Return-To-Play.pdf', 'I'); //Output to screen.
-$pdf->Output(sys_get_temp_dir().'/appendix-k.pdf', 'F'); //Save file
+$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'F'); //Save file
 //============================================================+
 // END OF FILE                                                
 //============================================================+

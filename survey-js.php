@@ -111,11 +111,11 @@ function survey_generate_pdf(appendix_id) {
 
     var data = {
         appendix: appendix_id,
-        patient: patient_id
+        user: patient_id
     };
     
     jQuery.post('<?php echo plugins_url("survey-generate-pdf.php", __FILE__); ?>', data, function(response){
         console.log(response);
-        window.location.href = response;
+        window.location.href = "<?php echo plugins_url("survey-download-pdf.php", __FILE__); ?>"+"?file="+appendix_id;
     });
 }
