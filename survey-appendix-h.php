@@ -1,95 +1,56 @@
 <?php
 require_once('tcpdf/tcpdf.php');
+@require_once('fdpi/fpdi.php');
 
-// create new PDF document
-$pdf = new TCPDF();
+class PDF extends FPDI {
+    /**
+     * "Remembers" the template id of the imported page
+     */
+    var $_tplIdx;
+    
+    /**
+     * include a background template for every page
+     */
+    function Header() {
+        if (is_null($this->_tplIdx)) {
+            $this->setSourceFile('AppendixH.pdf');
+            $this->_tplIdx = $this->importPage(1);
+        }
+        $this->useTemplate($this->_tplIdx);
+    }
+    
+    function Footer() {}
+}
 
-// set document information
+//Gather user variables.
+global $wpdb;
 
-$pdf->SetCreator('Survey Plugin');
-$pdf->SetAuthor('Reterborough FHT');
-$pdf->SetTitle('Youth Sports Concussion Program Post-Injury General Information and Exertion Form');
-$pdf->SetSubject('Youth Sports');
-$pdf->SetKeywords('Appendix H');
+$query = "SELECT fullname FROM {$wpdb->prefix}survey_users WHERE id=%d";
+$patient_name = $wpdb->get_var($wpdb->prepare($query, $_POST['user']));
 
-// remove default header/footer
-$pdf->setPrintHeader(false);
-$pdf->setPrintFooter(false);
-
-// ---------------------------------------------------------
+// initiate PDF
+$pdf = new PDF();
+$pdf->SetMargins(40, 48, PDF_MARGIN_RIGHT);
+$pdf->SetAutoPageBreak(true, 40);
+$pdf->setFontSubsetting(false);
 
 // add a page
 $pdf->AddPage();
 
-// create some HTML content
-$html = <<<HTML
-<center>
-<table cellpadding="0" cellspacing="0">
-    <tbody>
-        <tr><td><img alt="Appendix H" src="images/apH.PNG"></td></tr>
-        <tr>
-        <td align="left">
-            <table>
-                <tbody>
-                    <tr>
-                        <td>Patient Name: __________________________</td>
-                        <td>Date of Visit: _______</td>
-                    </tr>
-                    <tr>
-                        <td>School: _____________</td>
-                        <td>Date of Birth: _____________</td>
-                    </tr>
-                </tbody>
-            </table>
-            <br>
-            The patient above has been have been diagnosed with a concussion
-            and is not considered safe to return to collision sport activity until
-            cleared at an appropriate time by a physician or nurse practitioner.
-            The following text outlines current activity restrictions: <br>
-            <br>
-            No physical exertion until scheduled reassessment on _________________. <br>
-            <br>
-            Physical exertion is permitted with the following restrictions as of _________________:<br>
-            <br>
-            ___ Light non-contact exertion.<br>
-            ___ Moderate non-contact exertion. <br>
-            ___ Heavy non-contact exertion. <br>
-            <br>
-            <br>
-            Physical exertion is permitted when symptom free for _____ days <br>
-            with the following restrictions as of _________________: <br>
-            <br>
-            ___ Light non-contact exertion. <br>
-            ___ Moderate non-contact exertion. <br>
-            ___ Heavy non-contact exertion <br>
-            <br>
-            Begin Youth Sports Concussion Program Return to Play Protocol. <br>
-            <br>
-            Signature: _____________________________________________ <br>
-            <br>
-            ACTIVITY LEVELS <br>
-            Light non-contact exertion: Walking, stationary cycling, light jogging, light resistance training <br>
-            Moderate non-contact exertion: Moderate jogging, stationary cycling, elliptical, 
-            moderate resistance training <br>
-            Heavy non-contact exertion: Sprinting, heavy resistance training, non-contact sport drills, plyometrics <br>
-            <br>
-            *If development of worsening of symptoms occurs with recommended activity levels/ restrictions then 
-            please discontinue activity for 24 hours and resume at a lighter level.
-        </td>
-    </tr>
-  </tbody>
-</table>
-</center>
-HTML;
+// now write some text onto the imported page
+//Documentation for WriteHTML Cell can be found here:
+//http://www.tcpdf.org/doc/classTCPDF.html#a8458280d15b73d3baffb28eebe2d9246
 
-// output the HTML content
-$pdf->writeHTML($html);
+//The gist of it is this though: (width of cell, line height, top left x co-ordinate, tl Y co-ord, string to oputput)
+$pdf->writeHTMLCell(50, 1, 40, 48, $patient_name);
+$pdf->writeHTMLCell(50, 1, 150, 48, "Start Date");
 
 // ---------------------------------------------------------
 //Close and output PDF document
 //$pdf->Output('Return-To-Play.pdf', 'D'); // Force Download
 //$pdf->Output('Return-To-Play.pdf', 'I'); //Output to screen.
 //$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'F'); //Save file
+unlink(sys_get_temp_dir().'/appendix-h.pdf'); //Delete the temp file before recreating it.
 $pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'FI'); //Output to screen. and save to location.
 //$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'FD'); //Force Download. and save to location.
 //============================================================+

@@ -2,7 +2,7 @@
 @require_once('../../../wp-config.php');
 
 //Verify that it's a physician looking to download this form.
-if (is_physician(get_survey_user_session())) {
+//if (is_physician(get_survey_user_session())) {
     $folder = sys_get_temp_dir();
     $file = "appendix-{$_GET['file']}.pdf";
 
@@ -18,7 +18,11 @@ if (is_physician(get_survey_user_session())) {
     header('Content-Disposition: inline; filename="' . $file . '"');
     header('Content-Transfer-Encoding: binary');
     header('Content-Length: ' . filesize($folder . '/' . $file));
+    //Attempt to force the browser to not cache the PDF.
+    header('Cache-Control: no-cache, no-store, must-revalidate'); // HTTP 1.1
+    header('Pragma: no-cache'); // HTTP 1.0
+    header('Expires: 0'); // Proxies
     header('Accept-Ranges: bytes');
     
     readfile($folder . '/' . $file);
-}
+//}
