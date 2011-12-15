@@ -26,9 +26,11 @@ function set_survey_user_session() {
     }
     
     if (isset($_POST['survey_submit-l'])) {
+        survey_logout_user(); //Force a logout. There have been weird issues.
         $user_id = survey_login_user();
     }
     elseif (isset($_POST['survey_submit-r'])) {
+        survey_logout_user(); //Force a logout. There have been weird issues.
         $user_id = survey_register_user();
     }
     elseif (isset($_POST['survey_patient'])) {
