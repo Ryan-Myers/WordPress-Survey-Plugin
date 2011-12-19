@@ -31,13 +31,13 @@ foreach ($answers as $question_id=>$answer) {
     
     $query = "SELECT answer FROM {$wpdb->prefix}survey_user_answers WHERE user=%d AND question=%d";
     $prepared = $wpdb->prepare($query, $user_id, $question_id);
-    $answered = $wpdb->get_var($prepared);
+    $answered = $wpdb->get_row($prepared);
     
-    if ($answered === NULL) {
+    if ($answered === NULL) {       
         $wpdb->insert($wpdb->prefix."survey_user_answers", 
                       array('user'=>$user_id, 'question'=>$question_id, 'answer'=>$answer), array('%d', '%d', '%s'));
     }
-    elseif($answered !== NULL && $answer != $answered) {
+    elseif($answered !== NULL && $answer != $answered->answer) {
         $wpdb->update($wpdb->prefix."survey_user_answers", 
                       array('answer'=>$answer), array('user'=>$user_id, 'question'=>$question_id), 
                       array('%s'), array('%d', '%d', '%s'));

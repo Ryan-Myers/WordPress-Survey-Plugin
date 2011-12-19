@@ -48,7 +48,7 @@ $pdf->AddPage();
 //
 $pdf->writeHTMLCell(50, 1, 40, 48, $patient_name);
 $pdf->writeHTMLCell(50, 1, 150, 48, "Start TEST Date");
-$pdf->writeHTMLCell(50, 1, 30, 58, "Start TEST School");
+$pdf->writeHTMLCell(50, 1, 30, 58, $school);
 $pdf->writeHTMLCell(50, 1, 150, 58, "Date of Birth");
 $pdf->writeHTMLCell(50, 1, 26, 86, "x");
 $pdf->writeHTMLCell(50, 1, 125, 86, "date Reassessment");
