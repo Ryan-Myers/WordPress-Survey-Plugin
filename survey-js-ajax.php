@@ -33,7 +33,7 @@ foreach ($answers as $question_id=>$answer) {
     $prepared = $wpdb->prepare($query, $user_id, $question_id);
     $answered = $wpdb->get_row($prepared);
     
-    if ($answered === NULL) {       
+    if ($answered === NULL) {
         $wpdb->insert($wpdb->prefix."survey_user_answers", 
                       array('user'=>$user_id, 'question'=>$question_id, 'answer'=>$answer), array('%d', '%d', '%s'));
     }
