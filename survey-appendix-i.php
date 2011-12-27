@@ -13,7 +13,7 @@ class PDF extends FPDI {
      */
     function Header() {
         if (is_null($this->_tplIdx)) {
-            $this->setSourceFile('AppendixH.pdf');
+            $this->setSourceFile('AppendixI.pdf');
             $this->_tplIdx = $this->importPage(1);
         }
         $this->useTemplate($this->_tplIdx);

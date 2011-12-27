@@ -25,29 +25,34 @@ class PDF extends FPDI {
 //Gather user variables.
 global $wpdb;
 
+//Grab users name
 $query = "SELECT fullname FROM {$wpdb->prefix}survey_users WHERE id=%d";
 $patient_name = $wpdb->get_var($wpdb->prepare($query, $_POST['user']));
 
-$query = "SELECT answer FROM {$wpdb->preix}survey_user_answers WHERE user=%d AND question=59";
+//Grab the first time a question was edited, and use that as the basis for their date of visit.
+$query = "SELECT lastedited FROM {$wpdb->prefix}survey_user_answers WHERE user=%d ORDER BY lastedited LIMIT 1";
+$lastedited = substr($wpdb->get_var($wpdb->prepare($query, $_POST['user'])), 0, 10);
+
+//Grab the users school.
+$query = "SELECT answer FROM {$wpdb->prefix}survey_user_answers WHERE user=%d AND question=59";
 $school = $wpdb->get_var($wpdb->prepare($query, $_POST['user']));
 
-// initiate PDF
+//Initiate PDF
 $pdf = new PDF();
 $pdf->SetMargins(40, 48, PDF_MARGIN_RIGHT);
 $pdf->SetAutoPageBreak(true, 40);
 $pdf->setFontSubsetting(false);
 
-// add a page
+//Add a page
 $pdf->AddPage();
 
-// now write some text onto the imported page
+//Now write some text onto the imported page
 //Documentation for WriteHTML Cell can be found here:
 //http://www.tcpdf.org/doc/classTCPDF.html#a8458280d15b73d3baffb28eebe2d9246
 
-//The gist of it is this though: (width of cell, line height, top left x co-ordinate, tl Y co-ord, string to oputput)
-//
+//The gist of it is this though: (width of cell, line height, top left x co-ordinate, tl Y co-ord, string to output)
 $pdf->writeHTMLCell(50, 1, 40, 48, $patient_name);
-$pdf->writeHTMLCell(50, 1, 150, 48, "Start TEST Date");
+$pdf->writeHTMLCell(50, 1, 150, 48, $lastedited);
 $pdf->writeHTMLCell(50, 1, 30, 58, $school);
 $pdf->writeHTMLCell(50, 1, 150, 58, "Date of Birth");
 $pdf->writeHTMLCell(50, 1, 26, 86, "x");
