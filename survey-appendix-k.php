@@ -1,163 +1,69 @@
 <?php
 require_once('tcpdf/tcpdf.php');
+@require_once('fdpi/fpdi.php');
 
-// create new PDF document
-$pdf = new TCPDF();
+class PDF extends FPDI {
+    /**
+     * "Remembers" the template id of the imported page
+     */
+    var $_tplIdx;
+    
+    /**
+     * include a background template for every page
+     */
+    function Header() {
+        if (is_null($this->_tplIdx)) {
+            $this->setSourceFile('AppendixK.pdf');
+            $this->_tplIdx = $this->importPage(1);
+        }
+        $this->useTemplate($this->_tplIdx);
+    }
+    
+    function Footer() {}
+}
 
-// set document information
+//Gather user variables.
+global $wpdb;
 
-$pdf->SetCreator('Survey Plugin');
-$pdf->SetAuthor('Reterborough FHT');
-$pdf->SetTitle('Youth Sports Concussion Program Return to Play Clearance Form');
-$pdf->SetSubject('Youth Sports');
-$pdf->SetKeywords('Appendix K');
+$query = "SELECT fullname FROM {$wpdb->prefix}survey_users WHERE id=%d";
+$patient_name = $wpdb->get_var($wpdb->prepare($query, $_POST['user']));
 
-// remove default header/footer
-$pdf->setPrintHeader(false);
-$pdf->setPrintFooter(false);
+$query = "SELECT answer FROM {$wpdb->preix}survey_user_answers WHERE user=%d AND question=59";
+$school = $wpdb->get_var($wpdb->prepare($query, $_POST['user']));
 
-// ---------------------------------------------------------
+// initiate PDF
+$pdf = new PDF();
+$pdf->SetMargins(40, 48, PDF_MARGIN_RIGHT);
+$pdf->SetAutoPageBreak(true, 40);
+$pdf->setFontSubsetting(false);
 
 // add a page
 $pdf->AddPage();
 
-// create some HTML content
-$html = <<<HTML
-<font color="#211d1e" size="+1"><font color="#939698" size="+1"> </font></font>
-<div class="Sect"><font color="#211d1e" size="+1"><font color="#939698"
- size="+1"> </font></font>
-<p class="style1"><font color="#211d1e" size="+1"><font color="#939698"
- size="+1"> </font></font></p>
-<table style="text-align: left; width: 800px;" border="1"
- cellpadding="2" cellspacing="2">
-  <tbody>
-    <tr>
-      <td style="vertical-align: top;">
-      <p> <img style="width: 800px; height: 122px;" alt=""
- src="images/apK.PNG"></p>
-      </td>
-    </tr>
-    <tr>
-      <td style="vertical-align: top;">
-      <p class="style1"><font color="#211d1e" size="+1"><font
- color="#939698" size="+1"><font color="#4c4c4e" size="+3">Return to
-Play Clearance Form</font></font></font></p>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"> </font></font></font>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"> </font></font></font>
-      <div class="Sect"><font color="#211d1e" size="+1"><font
- color="#939698" size="+1"><font color="#4c4c4e" size="+3"> </font></font></font>
-      <p class="style1"><font color="#211d1e" size="+1"><font
- color="#939698" size="+1"><font color="#4c4c4e" size="+3"> <font
- color="#211d1e" size="+1">Patient Name:
-_____________________________________ Date of Visit: _____________</font></font></font></font></p>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"> </font></font></font></font>
-      <p class="style1"><font color="#211d1e" size="+1"><font
- color="#939698" size="+1"><font color="#4c4c4e" size="+3"><font
- color="#211d1e" size="+1"> School:
-_____________________________________ Date of Birth: _____________</font></font></font></font></p>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"> </font></font></font></font>
-      <p><font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"> <span
- class="style1">This Athlete</span><font color="#7a2984"><span
- class="style1"> did not</span><font color="#5a9b99"> <font
- color="#211d1e"> <span class="style1">sustain a concussion and may
-return to full activity.</span></font></font></font></font></font></font></font></p>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"> </font></font></font></font></font></font></font>
-      <p><font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"> <span
- class="style1">This Athlete </span> <font color="#7a2984"> <span
- class="style1">was </span> <font color="#211d1e"><span class="style1">diagnosed
-with a concussion and is permitted to return to </span> <font
- size="+1"> <span class="style1">full contact sports activities as of:</span></font></font></font></font></font></font></font></font></font></font></p>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"><font
- color="#7a2984"><font color="#211d1e"><font size="+1"> </font></font></font></font></font></font></font></font></font></font>
-      <p class="style1"><font color="#211d1e" size="+1"><font
- color="#939698" size="+1"><font color="#4c4c4e" size="+3"><font
- color="#211d1e" size="+1"><font color="#7a2984"><font color="#5a9b99"><font
- color="#211d1e"><font color="#7a2984"><font color="#211d1e"><font
- size="+1"> Today</font></font></font></font></font></font></font></font></font></font></p>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"><font
- color="#7a2984"><font color="#211d1e"><font size="+1"> </font></font></font></font></font></font></font></font></font></font>
-      <p class="style1"><font color="#211d1e" size="+1"><font
- color="#939698" size="+1"><font color="#4c4c4e" size="+3"><font
- color="#211d1e" size="+1"><font color="#7a2984"><font color="#5a9b99"><font
- color="#211d1e"><font color="#7a2984"><font color="#211d1e"><font
- size="+1"> ____________</font></font></font></font></font></font></font></font></font></font></p>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"><font
- color="#7a2984"><font color="#211d1e"><font size="+1"> </font></font></font></font></font></font></font></font></font></font>
-      <p class="style1"><font color="#211d1e" size="+1"><font
- color="#939698" size="+1"><font color="#4c4c4e" size="+3"><font
- color="#211d1e" size="+1"><font color="#7a2984"><font color="#5a9b99"><font
- color="#211d1e"><font color="#7a2984"><font color="#211d1e"><font
- size="+1"> Upon completion of the Youth Sports Concussion Program
-Return to Play Protocol </font></font></font></font></font></font></font></font></font></font></p>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"><font
- color="#7a2984"><font color="#211d1e"><font size="+1"> </font></font></font></font></font></font></font></font></font></font>
-      <p><font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"><font
- color="#7a2984"><font color="#211d1e"><font size="+1"> <span
- class="style1">______________________________________
-________________________________ </span><span class="style2">Name of
-Health Care Provider</span> <span class="style2">Signature</span></font></font></font></font></font></font></font></font></font></font></p>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"><font
- color="#7a2984"><font color="#211d1e"><font size="+1"> </font></font></font></font></font></font></font></font></font></font>
-      <p><font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"><font
- color="#7a2984"><font color="#211d1e"><font size="+1"> <span
- class="style1">______________________________________ </span> <span
- class="style2">Date </span> </font></font></font></font></font></font></font></font></font></font></p>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"><font
- color="#7a2984"><font color="#211d1e"><font size="+1"> </font></font></font></font></font></font></font></font></font></font></div>
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"><font
- color="#7a2984"><font color="#211d1e"><font size="+1"> </font> </font></font></font></font></font></font></font></font></font>
-      <p class="style1">&nbsp;
-      <font color="#211d1e" size="+1"><font color="#939698" size="+1"><font
- color="#4c4c4e" size="+3"><font color="#211d1e" size="+1"><font
- color="#7a2984"><font color="#5a9b99"><font color="#211d1e"><font
- color="#7a2984"><font color="#211d1e"> <br>
-      </font></font></font></font></font></font></font></font></font></p>
-      </td>
-    </tr>
-  </tbody>
-</table>
-<p class="style1"><font color="#211d1e" size="+1"><font color="#939698"
- size="+1"><font color="#4c4c4e" size="+3"><br>
-<br>
-</font></font></font></p>
-</div>
-HTML;
+// now write some text onto the imported page
+//Documentation for WriteHTML Cell can be found here:
+//http://www.tcpdf.org/doc/classTCPDF.html#a8458280d15b73d3baffb28eebe2d9246
 
-// output the HTML content
-$pdf->writeHTML($html);
-
+//The gist of it is this though: (width of cell, line height, top left x co-ordinate, tl Y co-ord, string to oputput)
+$pdf->writeHTMLCell(50, 1, 39, 58, $patient_name); //Patient Name
+$pdf->writeHTMLCell(50, 1, 150, 58, "Visit"); // Visit
+$pdf->writeHTMLCell(50, 1, 30, 70, "School"); // School
+$pdf->writeHTMLCell(50, 1, 150, 70, "DOB"); // Date of Birth
+$pdf->writeHTMLCell(50, 1, 23, 96, "x"); // This Athlete did not sustain a concussion and may return to full activity
+$pdf->writeHTMLCell(50, 1, 23, 125, "x"); // Today
+$pdf->writeHTMLCell(50, 1, 23, 136, "x"); // -----------------
+$pdf->writeHTMLCell(50, 1, 35, 136, "specified date"); // -----------------
+$pdf->writeHTMLCell(50, 1, 23, 147, "x"); //  Upon completion of the Youth Sports Concussion Program Return to Play Protocol
+$pdf->writeHTMLCell(50, 1, 15, 180, "Health Care Provider"); //  Health Care Provider
+$pdf->writeHTMLCell(50, 1, 15, 208, "Date"); //  Date
 // ---------------------------------------------------------
 //Close and output PDF document
 //$pdf->Output('Return-To-Play.pdf', 'D'); // Force Download
 //$pdf->Output('Return-To-Play.pdf', 'I'); //Output to screen.
-$pdf->Output(sys_get_temp_dir().'/appendix-k.pdf', 'F'); //Save file
+//$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'F'); //Save file
+unlink(sys_get_temp_dir().'/appendix-k.pdf'); //Delete the temp file before recreating it.
+$pdf->Output(sys_get_temp_dir().'/appendix-k.pdf', 'FI'); //Output to screen. and save to location.
+//$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'FD'); //Force Download. and save to location.
 //============================================================+
 // END OF FILE                                                
 //============================================================+
