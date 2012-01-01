@@ -27,13 +27,21 @@ class survey {
                 //Double check that it's not empty. Exploding nothing will create a single entry with an empty string.
                 $questions = (!empty($questions[0])) ? $questions : array();
                 
-                //Get the number of pages by dividing the questions by questions per page and rounding up.
-                $this->pages = ceil(count($questions) / $this->questionsperpage);
-                
                 //Create a question object for each question.
                 foreach ($questions as $question_id) {
-                    $this->add_qobject(new question($question_id));
+                    $qobject = new question($question_id);
+                    
+                    //Don't add questions to the survey if they're for physicians only, and this is a patient.
+                    if ($qobject->physician == 1 && !is_physician()) {
+                        continue;
+                    }
+                    else {
+                        $this->add_qobject($qobject);
+                    }
                 }
+                
+                //Get the number of pages by dividing the questions by questions per page and rounding up.
+                $this->pages = ceil(count($this->qobjects) / $this->questionsperpage);
             }
             else {
                 throw new Exception("Survey ID $id does not exist!");
