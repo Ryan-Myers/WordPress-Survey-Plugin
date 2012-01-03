@@ -39,10 +39,10 @@ $pdf->AddPage();
 //http://www.tcpdf.org/doc/classTCPDF.html#a8458280d15b73d3baffb28eebe2d9246
 
 //The gist of it is this though: (width of cell, line height, top left x co-ordinate, tl Y co-ord, string to oputput)
-$pdf->writeHTMLCell(50, 1, 39, 58, $patient_name); //Patient Name
-$pdf->writeHTMLCell(50, 1, 150, 58, $lastedited); // Visit
-$pdf->writeHTMLCell(50, 1, 30, 70, $school); // School
-$pdf->writeHTMLCell(50, 1, 150, 70, $birthdate); // Date of Birth
+$pdf->writeHTMLCell(50, 1, 38, 43, $patient_name);
+$pdf->writeHTMLCell(50, 1, 150, 43, $lastedited);
+$pdf->writeHTMLCell(50, 1, 28, 53, $school);
+$pdf->writeHTMLCell(50, 1, 150, 53, $birthdate);
 
 // ---------------------------------------------------------
 //Close and output PDF document

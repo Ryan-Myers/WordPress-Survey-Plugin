@@ -41,9 +41,10 @@ $pdf->AddPage();
 
 //The gist of it is this though: (width of cell, line height, top left x co-ordinate, tl Y co-ord, string to oputput)
 $pdf->writeHTMLCell(50, 1, 38, 43, $patient_name);
-$pdf->writeHTMLCell(50, 1, 150, 43, "Visit");
-$pdf->writeHTMLCell(50, 1, 28, 53, "School");
-$pdf->writeHTMLCell(50, 1, 150, 53, "DOB");
+$pdf->writeHTMLCell(50, 1, 150, 43, $lastedited);
+$pdf->writeHTMLCell(50, 1, 28, 53, $school);
+$pdf->writeHTMLCell(50, 1, 150, 53, $birthdate);
+/*
 $pdf->writeHTMLCell(50, 1, 38, 150, "Date_of_Injury");
 $pdf->writeHTMLCell(50, 1, 12, 158, "x");
 $pdf->writeHTMLCell(50, 1, 12, 164, "x");
@@ -64,6 +65,7 @@ $pdf->writeHTMLCell(50, 1, 20, 204, "x");
 $pdf->writeHTMLCell(50, 1, 20, 209, "x");
 $pdf->writeHTMLCell(50, 1, 90, 218, "Rec_Date");//recommendations
 $pdf->writeHTMLCell(50, 1, 12, 232, "Rec_Date");//Physician
+*/
 
 // ---------------------------------------------------------
 //Close and output PDF document
