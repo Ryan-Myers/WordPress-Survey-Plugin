@@ -1,6 +1,9 @@
 <?php
 require_once('tcpdf/tcpdf.php');
 @require_once('fdpi/fpdi.php');
+//Call the basic info and set them as globals to be used below.
+require_once('survey-patient-pdf-info.php');
+global $patient_name,$lastedited,$school,$birthdate;
 
 class PDF extends FPDI {
     /**
@@ -22,14 +25,6 @@ class PDF extends FPDI {
     function Footer() {}
 }
 
-//Gather user variables.
-global $wpdb;
-
-$query = "SELECT fullname FROM {$wpdb->prefix}survey_users WHERE id=%d";
-$patient_name = $wpdb->get_var($wpdb->prepare($query, $_POST['user']));
-
-$query = "SELECT answer FROM {$wpdb->preix}survey_user_answers WHERE user=%d AND question=59";
-$school = $wpdb->get_var($wpdb->prepare($query, $_POST['user']));
 
 // initiate PDF
 $pdf = new PDF();
@@ -72,11 +67,12 @@ $pdf->writeHTMLCell(50, 1, 12, 232, "Rec_Date");//Physician
 
 // ---------------------------------------------------------
 //Close and output PDF document
+unlink(sys_get_temp_dir().'/appendix-i.pdf'); //Delete the temp file before recreating it.
+$pdf->Output(sys_get_temp_dir().'/appendix-i.pdf', 'FI'); //Output to screen. and save to location.
+
 //$pdf->Output('Return-To-Play.pdf', 'D'); // Force Download
 //$pdf->Output('Return-To-Play.pdf', 'I'); //Output to screen.
 //$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'F'); //Save file
-unlink(sys_get_temp_dir().'/appendix-i.pdf'); //Delete the temp file before recreating it.
-$pdf->Output(sys_get_temp_dir().'/appendix-i.pdf', 'FI'); //Output to screen. and save to location.
 //$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'FD'); //Force Download. and save to location.
 //============================================================+
 // END OF FILE                                                

@@ -1,6 +1,9 @@
 <?php
 require_once('tcpdf/tcpdf.php');
 @require_once('fdpi/fpdi.php');
+//Call the basic info and set them as globals to be used below.
+require_once('survey-patient-pdf-info.php');
+global $patient_name,$lastedited,$school,$birthdate;
 
 class PDF extends FPDI {
     /**
@@ -22,21 +25,6 @@ class PDF extends FPDI {
     function Footer() {}
 }
 
-//Gather user variables.
-global $wpdb;
-
-//Grab users name
-$query = "SELECT fullname FROM {$wpdb->prefix}survey_users WHERE id=%d";
-$patient_name = $wpdb->get_var($wpdb->prepare($query, $_POST['user']));
-
-//Grab the first time a question was edited, and use that as the basis for their date of visit.
-$query = "SELECT lastedited FROM {$wpdb->prefix}survey_user_answers WHERE user=%d ORDER BY lastedited LIMIT 1";
-$lastedited = substr($wpdb->get_var($wpdb->prepare($query, $_POST['user'])), 0, 10);
-
-//Grab the users school.
-$query = "SELECT answer FROM {$wpdb->prefix}survey_user_answers WHERE user=%d AND question=59";
-$school = $wpdb->get_var($wpdb->prepare($query, $_POST['user']));
-
 //Initiate PDF
 $pdf = new PDF();
 $pdf->SetMargins(40, 48, PDF_MARGIN_RIGHT);
@@ -54,7 +42,10 @@ $pdf->AddPage();
 $pdf->writeHTMLCell(50, 1, 40, 48, $patient_name);
 $pdf->writeHTMLCell(50, 1, 150, 48, $lastedited);
 $pdf->writeHTMLCell(50, 1, 30, 58, $school);
-$pdf->writeHTMLCell(50, 1, 150, 58, "Date of Birth");
+$pdf->writeHTMLCell(50, 1, 150, 58, $birthdate);
+
+//The following is the placement for filling in the other fields, but those likely need to be filled out by hand.
+/*
 $pdf->writeHTMLCell(50, 1, 26, 86, "x");
 $pdf->writeHTMLCell(50, 1, 125, 86, "date Reassessment");
 $pdf->writeHTMLCell(50, 1, 26, 101, "x");
@@ -69,14 +60,17 @@ $pdf->writeHTMLCell(50, 1, 45, 149, "x");
 $pdf->writeHTMLCell(50, 1, 45, 156, "x");
 $pdf->writeHTMLCell(50, 1, 45, 163, "x");
 $pdf->writeHTMLCell(50, 1, 26, 178, "x");
+*/
 
 // ---------------------------------------------------------
 //Close and output PDF document
+unlink(sys_get_temp_dir().'/appendix-h.pdf'); //Delete the temp file before recreating it.
+$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'FI'); //Output to screen. and save to location.
+
+
 //$pdf->Output('Return-To-Play.pdf', 'D'); // Force Download
 //$pdf->Output('Return-To-Play.pdf', 'I'); //Output to screen.
 //$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'F'); //Save file
-unlink(sys_get_temp_dir().'/appendix-h.pdf'); //Delete the temp file before recreating it.
-$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'FI'); //Output to screen. and save to location.
 //$pdf->Output(sys_get_temp_dir().'/appendix-h.pdf', 'FD'); //Force Download. and save to location.
 //============================================================+
 // END OF FILE                                                
