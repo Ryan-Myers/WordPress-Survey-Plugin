@@ -17,6 +17,7 @@ require_once 'survey-question-class.php';
 require_once 'survey-js-admin.php';
 require_once 'survey-registration.php';
 require_once 'survey-page.php';
+require_once 'survey-quiz-setup.php';
 
 register_activation_hook(__FILE__, 'survey_activation');
 register_deactivation_hook(__FILE__, 'survey_deactivation');
@@ -37,6 +38,8 @@ add_action('wp_ajax_survey_reorder_ajax', 'survey_reorder_ajax_callback');
 function survey_activation() {
     global $wpdb;
     $survey_version = '1.0';
+    
+    survey_deactivation();
     
     //Create all of the tables needed to get things up and running.
     $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey` (
@@ -79,6 +82,8 @@ function survey_activation() {
     `lastedited` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (  `user` ,  `question` ))");
     
+    //survey_insert_quiz();
+    
     //Add the survey version to the wordpress options table. 
     //Useful for making sure they're on the latest version, and for adding proper upgrade paths.
     add_option('survey_version', $survey_version);
@@ -91,10 +96,10 @@ function survey_deactivation() {
     global $wpdb;
     
     //Remove the created tables for this plugin
-    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
-    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
-    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
-    //$wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_questions");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_answers");
+    $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_user_answers");
     
     //Remove the survey version from the wordpress options table.
