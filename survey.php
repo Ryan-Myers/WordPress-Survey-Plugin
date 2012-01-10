@@ -82,7 +82,7 @@ function survey_activation() {
     `lastedited` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (  `user` ,  `question` ))");
     
-    //survey_insert_quiz();
+    survey_insert_quiz();
     
     //Add the survey version to the wordpress options table. 
     //Useful for making sure they're on the latest version, and for adding proper upgrade paths.
