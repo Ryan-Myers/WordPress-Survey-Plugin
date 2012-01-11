@@ -82,6 +82,25 @@ function survey_activation() {
     `lastedited` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (  `user` ,  `question` ))");
     
+    //Create the default page to show the survey.
+    $current_user = wp_get_current_user();
+    $post = array(
+      'post_author' => $current_user->ID,
+      'post_content' => '[survey-page id=1]',
+      'post_status' => 'publish',
+      'post_title' => 'Survey',
+      'post_type' => 'page'
+    );
+    
+    $post_id = wp_insert_post($post);
+    
+    if ($post_id != 0) {
+        add_option('survey_post_id', $post_id);
+    }
+    else {
+        add_option('survey_post_id', 0);
+    }
+    
     survey_insert_quiz();
     
     //Add the survey version to the wordpress options table. 
@@ -102,8 +121,12 @@ function survey_deactivation() {
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_users");
     $wpdb->query("DROP TABLE IF EXISTS ".$wpdb->prefix."survey_user_answers");
     
+    //Remove the post created by this plugin. Forcefully remove it from the trash as well.
+    wp_delete_post(get_option('survey_post_id'),true);
+    
     //Remove the survey version from the wordpress options table.
     delete_option('survey_version');
+    delete_option('survey_post_id');
 }
 
 /**
