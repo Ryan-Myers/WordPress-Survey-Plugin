@@ -8,30 +8,6 @@ survey_activation();
 function survey_insert_quiz() {
 global $wpdb;
 
-/*
-$current_user = wp_get_current_user();
-$ID = intval($wpdb->get_var("SELECT MAX(ID) FROM `{$wpdb->prefix}posts`")) + 1;
-$post_date = date('Y-m-d H:i:s');
-$post_date_gmt = gmdate('Y-m-d H:i:s');
-$site_url = get_site_url();
-$permalinks = get_option('permalink_structure');
-
-if ($permalinks == '/%year%/%monthnum%/%day%/%postname%/') {
-
-}
-elseif ($permalinks == '/%year%/%monthnum%/%day%/%postname%/') {
-}
-
-$wpdb->query("INSERT INTO `" . $wpdb->prefix . "posts` (`ID`, `post_author`, `post_date`, `post_date_gmt`, 
-`post_content`, `post_title`, `post_excerpt`, `post_status`, `comment_status`, 
-`ping_status`, `post_password`, `post_name`, `to_ping`, `pinged`, `post_modified`, 
-`post_modified_gmt`, `post_content_filtered`, `post_parent`, 
-`guid`, `menu_order`, `post_type`, `post_mime_type`, `comment_count`) VALUES
-({$ID}, {$current_user->ID}, '{$post_date}', '{$post_date_gmt}', '[survey-page id=1]', 'Survey', '', 
-'publish', 'open', 'open', '', 'survey', '', '', '{$post_date}', '{$post_date_gmt}', '', 0, 
-'http://ryanmyers.ca/?page_id=30', 0, 'page', '', 0)");
-*/
-
 $wpdb->query("INSERT INTO `" . $wpdb->prefix . "survey` (`id`, `name`, `questions`, `questionsperpage`) VALUES
 (1, 'Consussion Survey', '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,".
 "33,34,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,".
