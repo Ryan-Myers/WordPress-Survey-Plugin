@@ -46,7 +46,7 @@ function survey_test($atts, $content=null) {
     $insert = $wpdb->insert($wpdb->prefix.'survey_users', 
                             array('username'=>'tester', 'password'=>sha1('tester'.$survey_salt, true), 
                                   'fullname'=>'Test User'), 
-                            array('%s', '%s', '%s', '%d'));
+                            array('%s', '%s', '%s'));
                             
     $id = $insert ? $wpdb->insert_id : FALSE;
     
@@ -63,34 +63,34 @@ function survey_test($atts, $content=null) {
     
     $survey1 = new survey(FALSE, "Survey 1");
     
-    $question1 = $survey1->add_question(question::truefalse, "True/False: Order 1", -1, -1, 0, 1);
+    $question1 = $survey1->add_question(question::truefalse, "True/False: Order 1", -1, -1, 1);
     $question1->add_answer("TF Answer 1 DONT SHOW THIS!", 1);
     
-    $question2 = $survey1->add_question(question::multichoice, "Multiple Choice: Order 2", -1, -1, 0, 2);
+    $question2 = $survey1->add_question(question::multichoice, "Multiple Choice: Order 2", -1, -1, 2);
     $question2->add_answer("MC Answer 1", 1);
     $question2->add_answer("MC Answer 2");
     $question2->add_answer("MC Answer 3", 3);
     
-    $question3 = $survey1->add_question(question::dropdown, "Dropdown: Order 3", -1, -1, 0, 3);
+    $question3 = $survey1->add_question(question::dropdown, "Dropdown: Order 3", -1, -1, 3);
     $question3->add_answer("DD Answer 1");
     $question3->add_answer("DD Answer 2", 2);
     
-    $question4 = $survey1->add_question(question::multiselect, "Multiple Select: Order 4", -1, -1, 0, 1);
+    $question4 = $survey1->add_question(question::multiselect, "Multiple Select: Order 4", -1, -1, 1);
     $question4->add_answer("MS Answer 2", 2);
     $question4->add_answer("MS Answer 1", 1);
     $question4->add_answer("MS Answer 3", 3);
     
-    $question5 = $survey1->add_question(question::shortanswer, "Short Answer: Order 6", -1, -1, 0, 6);
+    $question5 = $survey1->add_question(question::shortanswer, "Short Answer: Order 6", -1, -1, 6);
     $question5->add_answer("SA Answer 1 DONT SHOW THIS!", 1);
     
-    $question6 = $survey1->add_question(question::longanswer, "Long Answer: Order 5", -1, -1, 0, 5);
+    $question6 = $survey1->add_question(question::longanswer, "Long Answer: Order 5", -1, -1, 5);
     $question6->add_answer("LA Answer 1 DONT SHOW THIS!", 1);
     
-    $question7 = $survey1->add_question(question::multichoiceother, "Multiple Choice Other: Order 7", -1, -1, 0, 7);
+    $question7 = $survey1->add_question(question::multichoiceother, "Multiple Choice Other: Order 7", -1, -1, 7);
     $question7->add_answer("MCO Answer 1");
     $question7->add_answer("MCO Answer 2");
     
-    $question8 = new question(FALSE, question::multiselectother, "Multiple Select Other: Order 8", -1, -1, 0, 8);
+    $question8 = new question(FALSE, question::multiselectother, "Multiple Select Other: Order 8", -1, -1, 8);
     $question8->add_answer("MSO Answer 1");
     $question8->add_answer("MSO Answer 2");
     $survey1->add_qobject($question8);
