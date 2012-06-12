@@ -17,30 +17,7 @@ function survey_page($atts, $content=null) {
         $logout = (strstr($_SERVER['REQUEST_URI'], '?') === FALSE) ? "?logout=1" : "&logout=1";
     }
     
-    if (is_physician($user_id)) {
-        echo "<h3>Physician Logged in</h3>";
-        
-        echo "<div id='survey-logout'>
-                You are currently logged in as $fullname, 
-                <a href='{$_SERVER['REQUEST_URI']}{$logout}'>click here to logout</a>
-              </div>";
-              
-        echo "<div>Select a patient from the list to view their survey</div>";
-        
-        echo "<form action='{$_SERVER['REQUEST_URI']}' method='post'>
-                <select id='survey_patient' name='survey_patient'>".get_patients($user_id)."</select>
-                <input type='submit' value='View Patient Survey' />
-              </form>";
-              
-        echo "<div>Generate a PDF</div>
-              <div>
-                <input type='button' value='Appendix H' onclick='survey_generate_pdf(\"h\")' />
-                <input type='button' value='Appendix I' onclick='survey_generate_pdf(\"i\")' />
-                <input type='button' value='Appendix K' onclick='survey_generate_pdf(\"k\")' />
-                <input type='button' value='Appendix L' onclick='survey_generate_pdf(\"l\")' />
-              </div>";
-    }
-    elseif ($user_id !== FALSE) {
+    if ($user_id !== FALSE) {
         $survey = new survey($atts['id']);
         
         echo "<h3>$survey->name</h3>\n";
@@ -68,7 +45,7 @@ function survey_test($atts, $content=null) {
     
     $insert = $wpdb->insert($wpdb->prefix.'survey_users', 
                             array('username'=>'tester', 'password'=>sha1('tester'.$survey_salt, true), 
-                                  'fullname'=>'Test User', 'physician'=>1), 
+                                  'fullname'=>'Test User'), 
                             array('%s', '%s', '%s', '%d'));
                             
     $id = $insert ? $wpdb->insert_id : FALSE;

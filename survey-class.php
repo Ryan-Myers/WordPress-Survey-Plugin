@@ -30,14 +30,7 @@ class survey {
                 //Create a question object for each question.
                 foreach ($questions as $question_id) {
                     $qobject = new question($question_id);
-                    
-                    //Don't add questions to the survey if they're for physicians only, and this is a patient.
-                    if ($qobject->physician == 1 && !is_physician()) {
-                        continue;
-                    }
-                    else {
-                        $this->add_qobject($qobject);
-                    }
+                    $this->add_qobject($qobject);
                 }
                 
                 //Get the number of pages by dividing the questions by questions per page and rounding up.
@@ -143,9 +136,6 @@ class survey {
         $output = "<form id='survey-form-page-$page' style='display:none'>\n";
         
         for ($i = $question_start; $i <= $question_end; $i++) {
-            //If it's a physician only question and they're not a physician, skip it.
-            if ($this->qobjects[$i]->physician == 1 && !is_physician()) continue;
-            
             $output .= $this->qobjects[$i]->get_question();
         }
                 

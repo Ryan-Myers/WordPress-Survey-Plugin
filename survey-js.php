@@ -104,18 +104,3 @@ function survey_finish(page) {
     survey_post_form_data(page);
     jQuery('#survey-complete').show();
 }
-
-function survey_generate_pdf(appendix_id) {
-    var patient_id;
-    patient_id = jQuery('#survey_patient').val();
-
-    var data = {
-        appendix: appendix_id,
-        user: patient_id
-    };
-    
-    jQuery.post('<?php echo plugins_url("survey-generate-pdf.php", __FILE__); ?>', data, function(response){
-        console.log(response);
-        window.location.href = "<?php echo plugins_url("survey-download-pdf.php", __FILE__); ?>"+"?file="+appendix_id;
-    });
-}

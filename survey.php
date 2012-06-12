@@ -2,7 +2,7 @@
 /*
 Plugin Name: Survey
 Plugin URI: http://ryanmyers.ca
-Description: Creates a survey for patients of PeterboroughFHT
+Description: Creates a survey with login capabilities.
 Version: 1.0
 Author: Ryan Myers
 Author URI: http://ryanmyers.ca
@@ -17,7 +17,6 @@ require_once 'survey-question-class.php';
 require_once 'survey-js-admin.php';
 require_once 'survey-registration.php';
 require_once 'survey-page.php';
-require_once 'survey-quiz-setup.php';
 
 register_activation_hook(__FILE__, 'survey_activation');
 register_deactivation_hook(__FILE__, 'survey_deactivation');
@@ -55,7 +54,6 @@ function survey_activation() {
     `ordernum` SMALLINT NOT NULL ,
     `dependentquestion` INT NOT NULL DEFAULT  '-1' ,
     `dependentanswer` INT NOT NULL DEFAULT  '-1' ,
-    `physician` BOOLEAN NOT NULL DEFAULT  '0' ,
     `hidden` BOOLEAN NOT NULL DEFAULT  '0')");
     
     $wpdb->query("CREATE TABLE IF NOT EXISTS `" . $wpdb->prefix . "survey_answers` (
@@ -70,8 +68,6 @@ function survey_activation() {
     `username` VARCHAR( 30 ) NOT NULL ,
     `password` BINARY( 20 ) NOT NULL ,
     `fullname` VARCHAR( 50 ) NOT NULL ,
-    `physician` INT NOT NULL DEFAULT '0' ,
-    `is_physician` BOOLEAN NOT NULL DEFAULT  '0' ,
     `logged_in` DATETIME NULL ,
     UNIQUE (`username`))");
     
@@ -94,14 +90,14 @@ function survey_activation() {
     
     $post_id = wp_insert_post($post);
     
+    //If the post was created properly add the id to the survey_post_id option so that it can be deleted in the future.
     if ($post_id != 0) {
         add_option('survey_post_id', $post_id);
     }
     else {
+        //Just in case the post wasn't properly created, this will make it so no post will accidentally get deleted.
         add_option('survey_post_id', 0);
     }
-    
-    survey_insert_quiz();
     
     //Add the survey version to the wordpress options table. 
     //Useful for making sure they're on the latest version, and for adding proper upgrade paths.
@@ -153,7 +149,7 @@ function survey_add_script() {
 **/
 add_action('admin_menu', 'survey_add_admin_link');
 function survey_add_admin_link() {
-    $plugin_page = add_options_page('Survey Configuration', 'Survey Configuration', 'manage_options', 
+    $plugin_page = add_plugins_page('Survey Configuration', 'Survey Configuration', 'manage_options', 
                                     'SurveyOptionsPage', 'survey_show_admin_page');
     
     //Add the admin javascript
@@ -162,15 +158,6 @@ function survey_add_admin_link() {
     //Add the jQuery table reordering script
     wp_register_script("survey_tablednd_js", plugins_url('jquery.tablednd_0_5.js', __FILE__));
     wp_enqueue_script("survey_tablednd_js");
-}
-
-/**
-    Adds an option page for configuring the surveys. 
-**/
-add_action('admin_menu', 'survey_register_physician_link');
-function survey_register_physician_link() {
-    add_options_page('Register Physician', 'Register Physician', 'manage_options', 
-                     'SurveyPhysiciansPage', 'survey_register_physician_page');
 }
 
 /**

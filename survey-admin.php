@@ -231,7 +231,7 @@ function survey_add_question_ajax_callback() {
     
     //If this is being edited, the question id will be posted.
     if (isset($_POST['question'])) {
-        $query = "SELECT question,questiontype,dependentquestion,dependentanswer,physician
+        $query = "SELECT question,questiontype,dependentquestion,dependentanswer
                   FROM {$wpdb->prefix}survey_questions WHERE id=%d";
         $row = $wpdb->get_row($wpdb->prepare($query, intval($_POST['question'])));
         $qt = intval($row->questiontype);
@@ -244,7 +244,6 @@ function survey_add_question_ajax_callback() {
     else {
         //Default these values to noting to allow things to progress later on.
         $row->question = '';
-        $row->physician = 0;
         $answers[0][0] = "";
         $qt = NULL;
         $dq = -1;
@@ -294,13 +293,6 @@ function survey_add_question_ajax_callback() {
                         $count++; 
                     }
                 ?>
-                </div><br />
-                <div id="physician-only">
-                    Physician only?<br />
-                    <input type="radio" name="physician" value="0" 
-                        <?php if ($row->physician == 0) echo 'checked="checked"'; ?> /> No<br />
-                    <input type="radio" name="physician" value="1" 
-                        <?php if ($row->physician == 1) echo 'checked="checked"'; ?> /> Yes
                 </div><br />
                 <div id="dependent">
                     <p>If this question should only be shown to users who answered another question with a particular
@@ -365,7 +357,7 @@ function survey_get_dependent_answers($depquestion, $depanswer = -1) {
     //Grab the question type to determine how to handle the options.
     $query = "SELECT questiontype FROM {$wpdb->prefix}survey_questions WHERE id=%d";
     $qtype = $wpdb->get_var($wpdb->prepare($query, $depquestion));
-   
+    
     switch ($qtype) {
         //True/False questions don't have answers becuase it's always the same two.
         case question::truefalse:
@@ -445,11 +437,10 @@ function survey_submit_question_ajax_callback() {
         $qobject->edit_question($question['qtext']);
         $qobject->edit_type($question['qtype']);
         $qobject->edit_dependency($question['depquestion'], $question['depanswer']);
-        $qobject->edit_physician($question['physician']);
     }
     else {
         $qobject = new question(FALSE, $question['qtype'], $question['qtext'], 
-                                       $question['depquestion'], $question['depanswer'], $question['physician']);
+                                       $question['depquestion'], $question['depanswer']);
     }
     
     switch ($question['qtype']) {
