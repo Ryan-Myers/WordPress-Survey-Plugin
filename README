@@ -1,7 +1,6 @@
 This is Wordpress plugin that will eventually allow for creating surveys for users. 
-The goal is to allow users to register for the survey, fill it out, and then the administrator of the site
-can view the results, and make decisions based on the answers. It will probably use it's own
-registration system seperate from Wordpress.
+The goal is to allow users to register for the survey, fill it out, and then the administrator of the site can view the results, and make decisions based on the answers. 
+It will probably use it's own registration system seperate from Wordpress.
 
 The system is being designed from the ground up, and is intended to be easily expanded to support new features
 with minimal effort. 

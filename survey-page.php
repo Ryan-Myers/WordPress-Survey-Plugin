@@ -43,23 +43,15 @@ function survey_test($atts, $content=null) {
     global $wpdb;
     global $survey_salt;
     
-    $insert = $wpdb->insert($wpdb->prefix.'survey_users', 
-                            array('username'=>'tester', 'password'=>sha1('tester'.$survey_salt, true), 
-                                  'fullname'=>'Test User'), 
-                            array('%s', '%s', '%s'));
-                            
-    $id = $insert ? $wpdb->insert_id : FALSE;
-    
-    if ($id !== FALSE) {
-        var_dump(bin2hex(sha1('tester'.$survey_salt, true)));
-        var_dump(bin2hex($wpdb->get_var("SELECT password FROM {$wpdb->prefix}survey_users WHERE id=$id")));
+    //Empty the database and restart it.
+    if (isset($_GET['restart'])) { 
+        //Truncate the created tables for this plugin
+        $wpdb->query("TRUNCATE TABLE ".$wpdb->prefix."survey");
+        $wpdb->query("TRUNCATE TABLE ".$wpdb->prefix."survey_questions");
+        $wpdb->query("TRUNCATE TABLE ".$wpdb->prefix."survey_answers");
+        $wpdb->query("TRUNCATE TABLE ".$wpdb->prefix."survey_users");
+        $wpdb->query("TRUNCATE TABLE ".$wpdb->prefix."survey_user_answers");
     }
-    else {
-        echo "Failed to insert!";
-        var_dump(bin2hex(sha1('test'.$survey_salt, true)));
-    }
-    
-    debug($_POST);
     
     $survey1 = new survey(FALSE, "Survey 1");
     
@@ -98,9 +90,36 @@ function survey_test($atts, $content=null) {
     //$survey1->output_survey();
     debug($survey1);
     
-    if (isset($_POST['survey-id'])) {
-        $surveyOLD = new survey($_POST['survey-id']);
-        debug($surveyOLD->get_answers());
-        debug($surveyOLD);
+    //Empty the database and restart it.
+    if (isset($_GET['restart'])) {
+        $insert = $wpdb->insert($wpdb->prefix.'survey_users', 
+                                array('username'=>'tester', 'password'=>sha1('tester'.$survey_salt, true), 
+                                      'fullname'=>'Test User'), 
+                                array('%s', '%s', '%s'));
+                                
+        $id = $insert ? $wpdb->insert_id : FALSE;
+        
+        if ($id !== FALSE) {
+            var_dump(bin2hex(sha1('tester'.$survey_salt, true)));
+            var_dump(bin2hex($wpdb->get_var("SELECT password FROM {$wpdb->prefix}survey_users WHERE id=$id")));
+        }
+        else {
+            echo "Failed to insert!";
+            var_dump(bin2hex(sha1('test'.$survey_salt, true)));
+        }
+        
+        $post = array(
+            'menu_order'     => 0, //If new post is a page, it sets the order in which it should appear in the tabs.
+            'comment_status' => 'closed', // 'closed' means no comments.
+            'ping_status'    => 'closed', // 'closed' means pingbacks or trackbacks turned off
+            'post_author'    => get_current_user_id(), //The user ID number of the author.
+            'post_content'   => "[survey-page id={$survey1->id}]", //The full text of the post.
+            'post_name'      => 'test-survey-page', // The name (slug) for your post
+            'post_status'    => 'publish', //Set the status of the new post.
+            'post_title'     => 'Test Survey Page', //The title of your post.
+            'post_type'      => 'page' //You may want to insert a regular post, page, link, a menu item or some custom post type
+        );
+        
+        wp_insert_post($post, true);
     }
 }
